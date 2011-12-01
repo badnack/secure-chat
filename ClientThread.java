@@ -13,12 +13,14 @@ public class ClientThread extends Thread {
 	private boolean type;
 	private int port;
 	private String ip;
+        private String MyName;
 	
-	public ClientThread (int port, String ip, boolean type)throws IOException{
+        public ClientThread (String name,int port, String ip, boolean type)throws IOException{
 		this.sem = new ReentrantLock();
 		this.type = type;
 		this.port = port;
 		this.ip = ip;
+		this.MyName = name;
 		WaitCall = sem.newCondition();
 		accepted = false;
 	}
@@ -67,6 +69,7 @@ public class ClientThread extends Thread {
 		Socket csock;
 		ServerSocket ss;
 		boolean test;
+		String FName;
 		PrintStream StreamOut=null;
 		BufferedReader Buff=null;
 		BufferedReader stdIn = new BufferedReader ( new InputStreamReader (System.in));
@@ -80,15 +83,16 @@ public class ClientThread extends Thread {
 					if(IsConnected())System.exit(0); //whether the user has already connect the process has killed.
 					StreamOut = new PrintStream (csock.getOutputStream());
 					Buff = new BufferedReader (new InputStreamReader (csock.getInputStream()));
-					System.out.println(Buff.readLine()); //accept message
-				
+					System.out.print("[CHAT] "+Buff.readLine() + ": "); //accept message
+					FName = Buff.readLine();
 					sem.lock();
 					connect = true;							
 					WaitCall.await();//wait user decision (see other thread)				
 					sem.unlock();
 					if(!isAccepted())StreamOut.println("NACK");						
 					else {
-						StreamOut.println("ACK");						
+						StreamOut.println(MyName);
+						System.out.println("[CHAT] Connected with " + FName);
 						break;
 					}
 				}
@@ -96,30 +100,34 @@ public class ClientThread extends Thread {
 			}
 
 			//client's body
+			//receive the name on connect success
 			else{
 				System.out.println("Trying to connect on port: " + port);
 				if(IsConnected())System.exit(0);
 				csock = new Socket(ip,port);
 				StreamOut = new PrintStream (csock.getOutputStream());
 				Buff = new BufferedReader (new InputStreamReader (csock.getInputStream()));
-				StreamOut.println(ip + " : " + port + " would talk with you, please press \'y\' to accept");
-				String str1 = Buff.readLine();
-				if(str1.compareTo("NACK")==0){
+				StreamOut.println(MyName + " : " + ip + " : " + port + " would talk with you, please press \'y\' to accept");
+				StreamOut.println(MyName);
+				FName = Buff.readLine();
+				if(FName.compareTo("NACK")==0){
 					System.out.println("Connection not accepted");
 					System.exit(0);
 				}
+				else System.out.println("[CHAT ]Connected with " + FName);
 							
 			}
 			
 			/*receive messages*/
-			new ReceiveMessage(Buff).start();
+			new ReceiveMessage(Buff,FName).start();
 			
 			/*send messages*/
 			while (true)
 				StreamOut.println(stdIn.readLine());
 		}
 		catch (Exception e) {
-			System.out.println("[Error] port given has already used in another process");
+			System.out.println("[Error] User appears to be offline");
+			System.exit(0);
 		}	
 	}
 }

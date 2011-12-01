@@ -9,18 +9,21 @@ static final int PORTC = 1234;
 
 public static void main (String args[]){
 	String str;
+	String name;
 	int port;
 	ClientThread ct,cc;
 	BufferedReader stdIn = new BufferedReader ( new InputStreamReader (System.in));
 	try{
 		/* Accept thread*/
 		port = Integer.parseInt(args[0]);
-		ct = new ClientThread (port,"127.0.0.1",true);
+		System.out.print("[CHAT] Nickname: ");
+		name = stdIn.readLine();
+		ct = new ClientThread (name,port,"127.0.0.1",true);
 		ct.start();
 		
 		/*Message board shared by two thread*/
 		while(true){
-			System.out.println("--- Inser port to connect ---");
+			System.out.print("[CHAT] Port to connect: ");
 			str =  stdIn.readLine();
 
 			/*i try these two ways because the thread server could receive
@@ -51,7 +54,7 @@ public static void main (String args[]){
 			
 			
 			/* If i try to connect i close the server thread */
-			cc = new ClientThread (port,"127.0.0.1",false);
+			cc = new ClientThread (name,port,"127.0.0.1",false);
 			cc.start();
 			break;
 			
@@ -67,4 +70,3 @@ public static void main (String args[]){
 } // end metodo
 
 } // end class
-
