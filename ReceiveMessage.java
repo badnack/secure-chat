@@ -15,10 +15,13 @@ public class ReceiveMessage extends Thread {
 
     public void run(){
 	try{
-	    while (true){
-		String str1 = input.readLine();		
+	    String str1 = null;
+	    while ((str1 = input.readLine())!=null){			     
 		System.out.println(name + "> " + str1);
+		System.out.flush();
 	    }
+	    System.out.println(name + " has disconnected");
+	    System.exit(0);
 	}
 	catch (IOException e) {
 		System.out.println("Error on listening");
