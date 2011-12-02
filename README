@@ -1,0 +1,8 @@
+How to use SslChat:
+
+The password to use SSL certificate is "123456"
+
+The command to start SSL chat is:
+	"java -Djavax.net.ssl.keyStore=mySrvKeystore -Djavax.net.ssl.keyStorePassword=123456 Client <port>"
+where the <ports> MUST be different for both clients.
+

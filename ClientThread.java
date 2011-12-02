@@ -72,7 +72,7 @@ public class ClientThread extends Thread {
 
 	public void run(){
 	    //Socket sslcsock;
-	    ServerSocket ss;
+	    //ServerSocket ss;
 	    boolean test;
 	    String FName;
 	    PrintStream StreamOut=null;
