@@ -4,6 +4,7 @@ import java.lang.*;
 import java.util.concurrent.locks.*;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.SSLSocket;
 import java.net.*;
 
@@ -70,7 +71,7 @@ public class ClientThread extends Thread {
 	}
 
 	public void run(){
-	    Socket sslcsock;
+	    //Socket sslcsock;
 	    ServerSocket ss;
 	    boolean test;
 	    String FName;
@@ -83,12 +84,12 @@ public class ClientThread extends Thread {
 		    while(true){
 			resetConnect();
 			
-			//SSLServerSocketFactory sslserversocketfactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-			//SSLServerSocket sslserversocket = (SSLServerSocket) sslserversocketfactory.createServerSocket(port);
-			//SSLSocket sslcsock = (SSLSocket) sslserversocket.accept();
+			SSLServerSocketFactory sslserversocketfactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+			SSLServerSocket sslserversocket = (SSLServerSocket) sslserversocketfactory.createServerSocket(port);
+			SSLSocket sslcsock = (SSLSocket) sslserversocket.accept();
 			
-			ss = new ServerSocket(port);
-			sslcsock = ss.accept();// Attesa socket
+			//ss = new ServerSocket(port);
+			//sslcsock = ss.accept();// Attesa socket
 			if(IsConnected())System.exit(0); //whether the user has already connect the process has killed.
 			StreamOut = new PrintStream (sslcsock.getOutputStream());
 			Buff = new BufferedReader (new InputStreamReader (sslcsock.getInputStream()));
@@ -114,9 +115,9 @@ public class ClientThread extends Thread {
 		    System.out.println("Trying to connect on port: " + port);
 		    if(IsConnected())System.exit(0);
 		    
-		    sslcsock = new Socket(ip,port);
-		    /*SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-		      SSLSocket sslcsock = (SSLSocket) sslsocketfactory.createSocket(ip, port);*/
+		    //sslcsock = new Socket(ip,port);
+		    SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+		    SSLSocket sslcsock = (SSLSocket) sslsocketfactory.createSocket(ip, port);
 		    StreamOut = new PrintStream (sslcsock.getOutputStream());
 		    Buff = new BufferedReader (new InputStreamReader (sslcsock.getInputStream()));
 		    
