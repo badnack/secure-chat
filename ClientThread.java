@@ -47,10 +47,6 @@ public class ClientThread extends Thread {
 		this.MyName = name;
 		WaitCall = sem.newCondition();
 		accepted = false;
-		//generate the DES key -- (si deve inserire in un try/catch e cmq va definita sopra 
-		//						   come segreto condiviso tra i 2 client)
-		//KeyGenerator keygen = KeyGenerator.getInstance("DES");
-	    //desKey = keygen.generateKey();
 		
 	}
 
@@ -104,31 +100,10 @@ public class ClientThread extends Thread {
 	    BufferedReader stdIn = new BufferedReader ( new InputStreamReader (System.in));
 	    try{
 	    	
-	    /*	Cipher desCipherIn, desCipherOut;
-	        // Create the cipher DES with CBC in EDE configuration, also with padding
-	        desCipherIn = Cipher.getInstance("DESede/CBC/PKCS5Padding");
-	        //Initialize the cipher for encryption
-	        desCipherIn.init(Cipher.ENCRYPT_MODE, desKey);
-	        // to Encrypt the cleartext
-	        //byte[] ciphertext = desCipher.doFinal(cleartext);
-	        
-	        // Create the cipher DES with CBC in EDE configuration, also with padding
-	        desCipherOut = Cipher.getInstance("DESede/CBC/PKCS5Padding");
-	        //Initialize the same cipher for decryption
-	        desCipherOut.init(Cipher.DECRYPT_MODE, desKey);
-	        // to Decrypt the ciphertext
-	        //byte[] cleartext = desCipher.doFinal(ciphertext);
-	    	*/
-	    	
-	    
 		//server's body
 		if(type){
 		    while(true){
 			resetConnect();
-			
-			/*SSLServerSocketFactory sslserversocketfactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-			SSLServerSocket sslserversocket = (SSLServerSocket) sslserversocketfactory.createServerSocket(port);
-			SSLSocket sslcsock = (SSLSocket) sslserversocket.accept();*/
 			
 			ss = new ServerSocket(port);
 			sslcsock = ss.accept();// Attesa socket
@@ -141,53 +116,6 @@ public class ClientThread extends Thread {
 			connect = true;							
 			WaitCall.await();//wait user decision (see other thread)				
 			sem.unlock();
-			/*
-			// Some central authority creates new DH parameters
-			AlgorithmParameterGenerator paramGen = AlgorithmParameterGenerator.getInstance("DH");
-			paramGen.init(512);
-			AlgorithmParameters params = paramGen.generateParameters();
-			DHParameterSpec paramsSpec = (DHParameterSpec)params.getParameterSpec(DHParameterSpec.class);
-			
-			/*
-	         * Server creates her own DH key pair, using the DH parameters from
-	         * above
-	        *//*
-			KeyPairGenerator serverKpairGen = KeyPairGenerator.getInstance("DH");
-		    serverKpairGen.initialize(paramsSpec);
-		    KeyPair serverKpair = serverKpairGen.generateKeyPair();
-			
-		    //Server creates and initializes his DH KeyAgreement object
-		    
-		    KeyAgreement serverKeyAgree = KeyAgreement.getInstance("DH");
-	        serverKeyAgree.init(serverKpair.getPrivate());
-	        
-	        //Server encodes her public key, and sends it over to the Client
-	        byte[] serverPubKeyEnc = serverKpair.getPublic().getEncoded();
-	        //Send the Key to the client ----TO DO
-	        //Wait for the client's public key  and then save it to "clientPubKeyEnc"--TO DO
-	        
-	        /*
-	         * Server uses Client's public key for the first (and only) phase
-	         * of her version of the DH
-	         * protocol.
-	         * Before she can do so, she has to instanticate a DH public key
-	         * from Client's encoded key material.
-	        */
-	        /*
-	        KeyFactory serverKeyFac = KeyFactory.getInstance("DH");
-	        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(clientPubKeyEnc);
-	        PublicKey clientPubKey = serverKeyFac.generatePublic(x509KeySpec);
-	        serverKeyAgree.doPhase(clientPubKey, true);
-	        
-	        /*
-	         * At this stage, both Server and Client have completed the DH key
-	         * agreement protocol.
-	         * Server generate the (same) shared secret.
-	        *//*
-	        byte[] serverSharedSecret = serverKeyAgree.generateSecret();
-	        int serverLen = serverSharedSecret.length;
-	        //send "serverLen" to the Client --- TO DO (i don't know why ihihihih)
-		    */
 			if(!isAccepted())StreamOut.println("NACK");						
 			else {
 			    StreamOut.println(MyName);
@@ -205,63 +133,12 @@ public class ClientThread extends Thread {
 		    if(IsConnected())System.exit(0);
 		    
 		    sslcsock = new Socket(ip,port);
-		    /*SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-		    SSLSocket sslcsock = (SSLSocket) sslsocketfactory.createSocket(ip, port);
-		    StreamOut = new PrintStream (sslcsock.getOutputStream());*/
+		    StreamOut = new PrintStream (sslcsock.getOutputStream());
 		    Buff = new BufferedReader (new InputStreamReader (sslcsock.getInputStream()));
 		    
 		    StreamOut.println(MyName + " : " + ip + " : " + port + " would talk with you, please press \'y\' to accept");
 		    StreamOut.println(MyName);
-		    
-		    /*
-	         * Client has received Server's public key
-	         * in encoded format.
-	         * He instantiates a DH public key from the encoded key material.
-	        */
-		    /*
-		    //Client has received Server's public key and save it in "serverPubKeyEnc" ---TO DO
-		    KeyFactory clientKeyFac = KeyFactory.getInstance("DH");
-	        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(serverPubKeyEnc);
-	        PublicKey serverPubKey = clientKeyFac.generatePublic(x509KeySpec);
-	        
-	        /*
-	         * Client gets the DH parameters associated with Server's public key. 
-	         * He must use the same parameters when he generates his own key
-	         * pair.
-	         *//*
-	        DHParameterSpec dhParamSpec = ((DHPublicKey)serverPubKey).getParams();
-	        
-	        //Client creates his own DH key pair
-	        KeyPairGenerator clientKpairGen = KeyPairGenerator.getInstance("DH");
-	        clientKpairGen.initialize(dhParamSpec);
-	        KeyPair clientKpair = clientKpairGen.generateKeyPair();
-	        
-	        //Client creates and initializes his DH KeyAgreement object
-	        KeyAgreement clientKeyAgree = KeyAgreement.getInstance("DH");
-	        clientKeyAgree.init(clientKpair.getPrivate());
-	        
-	     	//Client encodes his public key, and sends it over to Server.
-	        byte[] clientPubKeyEnc = clientKpair.getPublic().getEncoded();
-		    //Send the key to the server -- TO DO
-	        
-	        /*
-	         * Client uses Server's public key for the first (and only) phase
-	         * of his version of the DH
-	         * protocol.
-	         *//*
-	        clientKeyAgree.doPhase(serverPubKey, true);
-	        
-	        /*
-	         * At this stage, both Server and Client have completed the DH key
-	         * agreement protocol.
-	         * Client generate the (same) shared secret.
-	         */
-	        //receive "serverLen from Server and save it in "serverLen" --- TO DO
-	        /*byte[] clientSharedSecret = new byte[serverLen];
-	        int clientLen = clientKeyAgree.generateSecret(clientSharedSecret, 0);
-	        */
-	        
-	        
+		            
 		    FName = Buff.readLine();
 		    if(FName.compareTo("NACK")==0){
 			System.out.println("Connection not accepted");
