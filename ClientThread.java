@@ -166,11 +166,11 @@ public class ClientThread extends Thread {
                 
             }
             
-            PublicKey PuKey = Rsa.GetPublicKey("asd");
-            PrivateKey PvKey = Rsa.GetPrivateKey("asd");
+            PublicKey PuKey = Rsa.GetPublicKey(FName);
+            PrivateKey PvKey = Rsa.GetPrivateKey(MyName);
+           
             /*receive messages*/
             new ReceiveMessage(ois,FName,PvKey).start();
-            
             
             /*send messages*/
             while (true)
