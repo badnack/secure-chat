@@ -9,6 +9,7 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.DHParameterSpec;
+import java.security.*;
 
 
 
@@ -123,11 +124,12 @@ public class ClientThread extends Thread {
                         StreamOut.writeObject(MyName.getBytes());
                         System.out.println("[CHAT] Connected with " + FName);
                         //Retrieves the public keys
-                        if(!Rsa.isPresent(FName)){
+                        /*if(!Rsa.isPresent(FName)){
                             StreamOut.writeObject(("GIMMEKEY").getBytes());
                             //retrieve the friend's key
                             RemoteFile.ReceiveFile(Rsa.UserToPath(FName,Rsa.KEY.PUBLIC),ois);
-                        }
+                            RemoteFile.SendFile(Rsa.UserToPath(MyName,Rsa.KEY.PUBLIC),StreamOut);
+                            }*/
                         
                         break;
                     }
@@ -155,17 +157,24 @@ public class ClientThread extends Thread {
                     System.out.println("Connection not accepted");
                     System.exit(0);
                 }
-                else if(FName.compareTo("GIMMEKEY")==0){/*Send the public key*/}
+                else if(FName.compareTo("GIMMEKEY")==0){/*Send the public key*/
+                    RemoteFile.SendFile(Rsa.UserToPath(MyName,Rsa.KEY.PUBLIC),StreamOut);
+                    RemoteFile.ReceiveFile(Rsa.UserToPath(FName,Rsa.KEY.PUBLIC),ois);
+                    
+                }
                 else System.out.println("[CHAT ]Connected with " + FName);
                 
             }
             
+            PublicKey PuKey = Rsa.GetPublicKey("asd");
+            PrivateKey PvKey = Rsa.GetPrivateKey("asd");
             /*receive messages*/
-            new ReceiveMessage(ois,FName).start();
+            new ReceiveMessage(ois,FName,PvKey).start();
+            
             
             /*send messages*/
             while (true)
-                StreamOut.writeObject(Rsa.Encrypt(stdIn.readLine(),MyName));
+                StreamOut.writeObject(Rsa.Encrypt(stdIn.readLine(),PuKey));
                 
         }
         catch (Exception e) {

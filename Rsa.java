@@ -59,49 +59,10 @@ public class Rsa {
 
     }
 
-    public static byte[] Encrypt(String data, String UserName) throws Exception {
-      
-        UserName="asd";
-        // LEGGI CHIAVE PUBBLICA CODIFICATA IN X509
-        FileInputStream fis = new FileInputStream(KEYPATH + UserName + "_" + PUBLICPATH);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int i = 0;
-        while((i = fis.read()) != -1) {
-            baos.write(i);
-        }
-        
-        
-        byte[] publicKeyBytes = baos.toByteArray();
-        baos.close();
-        
-        // CONVERTI CHIAVE PUBBLICA DA X509 A CHIAVE UTILIZZABILE
-        
-        // Inizializza convertitore da X.509 a chiave pubblica
-        X509EncodedKeySpec ks = new X509EncodedKeySpec(publicKeyBytes);
-        // Inizializza un KeyFactory per ricreare la chiave usando RSA 
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        // Crea una chiave pubblica usando generatePublic di KeyFactory in base la chiave decodificata da ks
-        PublicKey publicKey = kf.generatePublic(ks); 
-        
-        
-        byte[] plainFile;
-        plainFile=data.getBytes();
-        
-        
-        // Inizializzo un cifrario che usa come algoritmo RSA, come modalita' ECB e come padding PKCS1
-        Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        
-        // Lo inizializzo dicendo modalita' di codifica e chiave pubblica da usare
-        c.init(Cipher.ENCRYPT_MODE, publicKey);
-        // codifico e metto il risultato in encodeFile
-        byte[] encodeData = c.doFinal(plainFile);
-        return encodeData;
-    }
-    
-    public static String Decrypt(byte[] sorg ,String UserName) throws Exception{
-        UserName="asd";
-        
-        FileInputStream fis = new FileInputStream(KEYPATH + UserName + "_" + PRIVATEPATH);
+    /*To protect with password?*/
+    public static PrivateKey GetPrivateKey(String UserName) throws IOException,InvalidKeySpecException,NoSuchAlgorithmException{
+        String path = KEYPATH + UserName + "_" + PRIVATEPATH;        
+        FileInputStream fis = new FileInputStream(path);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         
         int i = 0;
@@ -117,7 +78,28 @@ public class Rsa {
         
         PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(privateKeyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
-        PrivateKey privateKey = kf.generatePrivate(ks);
+       return kf.generatePrivate(ks);
+       
+    }
+
+
+    public static byte[] Encrypt(String data, PublicKey publicKey) throws Exception {
+        
+        byte[] plainFile;
+        plainFile=data.getBytes();
+        
+        
+        // Inizializzo un cifrario che usa come algoritmo RSA, come modalita' ECB e come padding PKCS1
+        Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        
+        // Lo inizializzo dicendo modalita' di codifica e chiave pubblica da usare
+        c.init(Cipher.ENCRYPT_MODE, publicKey);
+        // codifico e metto il risultato in encodeFile
+        byte[] encodeData = c.doFinal(plainFile);
+        return encodeData;
+    }
+    
+    public static String Decrypt(byte[] sorg ,PrivateKey privateKey) throws Exception{
         
         // DECODIFICA
         

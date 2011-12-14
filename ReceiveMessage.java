@@ -1,16 +1,17 @@
-
 import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.lang.*;
+import java.security.*;
 
 public class ReceiveMessage extends Thread {
     private  ObjectInputStream input;
     private String name;
-
-    public ReceiveMessage (ObjectInputStream input,String name){
+    private PrivateKey PvKey;
+    public ReceiveMessage (ObjectInputStream input,String name,PrivateKey PvKey){
         this.input = input;
         this.name = name;
+        this.PvKey = PvKey;
     }
 
     public String getText (byte[] arr) throws UnsupportedEncodingException
@@ -25,7 +26,7 @@ public class ReceiveMessage extends Thread {
         while (true){
             try{
                 data = (byte[])input.readObject();
-                str = Rsa.Decrypt(data,name);
+                str = Rsa.Decrypt(data,PvKey);
                 if(str==null)break;                
                 System.out.println(name + "> " + str);
                 System.out.flush();
