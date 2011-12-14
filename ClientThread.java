@@ -104,7 +104,7 @@ public class ClientThread extends Thread {
 	    BufferedReader stdIn = new BufferedReader ( new InputStreamReader (System.in));
 	    try{
 	    	
-	    	Cipher desCipherIn, desCipherOut;
+	    /*	Cipher desCipherIn, desCipherOut;
 	        // Create the cipher DES with CBC in EDE configuration, also with padding
 	        desCipherIn = Cipher.getInstance("DESede/CBC/PKCS5Padding");
 	        //Initialize the cipher for encryption
@@ -118,7 +118,7 @@ public class ClientThread extends Thread {
 	        desCipherOut.init(Cipher.DECRYPT_MODE, desKey);
 	        // to Decrypt the ciphertext
 	        //byte[] cleartext = desCipher.doFinal(ciphertext);
-	    	
+	    	*/
 	    	
 	    
 		//server's body
@@ -141,7 +141,7 @@ public class ClientThread extends Thread {
 			connect = true;							
 			WaitCall.await();//wait user decision (see other thread)				
 			sem.unlock();
-			
+			/*
 			// Some central authority creates new DH parameters
 			AlgorithmParameterGenerator paramGen = AlgorithmParameterGenerator.getInstance("DH");
 			paramGen.init(512);
@@ -151,7 +151,7 @@ public class ClientThread extends Thread {
 			/*
 	         * Server creates her own DH key pair, using the DH parameters from
 	         * above
-	        */
+	        *//*
 			KeyPairGenerator serverKpairGen = KeyPairGenerator.getInstance("DH");
 		    serverKpairGen.initialize(paramsSpec);
 		    KeyPair serverKpair = serverKpairGen.generateKeyPair();
@@ -173,7 +173,7 @@ public class ClientThread extends Thread {
 	         * Before she can do so, she has to instanticate a DH public key
 	         * from Client's encoded key material.
 	        */
-	        
+	        /*
 	        KeyFactory serverKeyFac = KeyFactory.getInstance("DH");
 	        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(clientPubKeyEnc);
 	        PublicKey clientPubKey = serverKeyFac.generatePublic(x509KeySpec);
@@ -183,11 +183,11 @@ public class ClientThread extends Thread {
 	         * At this stage, both Server and Client have completed the DH key
 	         * agreement protocol.
 	         * Server generate the (same) shared secret.
-	        */
+	        *//*
 	        byte[] serverSharedSecret = serverKeyAgree.generateSecret();
 	        int serverLen = serverSharedSecret.length;
 	        //send "serverLen" to the Client --- TO DO (i don't know why ihihihih)
-		    
+		    */
 			if(!isAccepted())StreamOut.println("NACK");						
 			else {
 			    StreamOut.println(MyName);
@@ -218,7 +218,7 @@ public class ClientThread extends Thread {
 	         * in encoded format.
 	         * He instantiates a DH public key from the encoded key material.
 	        */
-		    
+		    /*
 		    //Client has received Server's public key and save it in "serverPubKeyEnc" ---TO DO
 		    KeyFactory clientKeyFac = KeyFactory.getInstance("DH");
 	        X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(serverPubKeyEnc);
@@ -228,7 +228,7 @@ public class ClientThread extends Thread {
 	         * Client gets the DH parameters associated with Server's public key. 
 	         * He must use the same parameters when he generates his own key
 	         * pair.
-	         */
+	         *//*
 	        DHParameterSpec dhParamSpec = ((DHPublicKey)serverPubKey).getParams();
 	        
 	        //Client creates his own DH key pair
@@ -248,7 +248,7 @@ public class ClientThread extends Thread {
 	         * Client uses Server's public key for the first (and only) phase
 	         * of his version of the DH
 	         * protocol.
-	         */
+	         *//*
 	        clientKeyAgree.doPhase(serverPubKey, true);
 	        
 	        /*
@@ -257,9 +257,9 @@ public class ClientThread extends Thread {
 	         * Client generate the (same) shared secret.
 	         */
 	        //receive "serverLen from Server and save it in "serverLen" --- TO DO
-	        byte[] clientSharedSecret = new byte[serverLen];
+	        /*byte[] clientSharedSecret = new byte[serverLen];
 	        int clientLen = clientKeyAgree.generateSecret(clientSharedSecret, 0);
-	        
+	        */
 	        
 	        
 		    FName = Buff.readLine();
