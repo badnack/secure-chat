@@ -12,8 +12,8 @@ import javax.crypto.Cipher;
 public class Rsa {
     static final String PUBLICPATH = "public.key";
     static final String PRIVATEPATH = "private.key";
-    static final String KEYPATH = "/home/badnack/Scrivania/";	
-
+    //static final String KEYPATH = "/home/badnack/Projects/SecureChat/Ssl-Chat/KeyFiles/";	
+    static final String KEYPATH = "/home/davide/Ssl-Chat/KeyFiles/";
     public static byte[] Encrypt(String data, String UserName) throws Exception {
 		
 		// LEGGI CHIAVE PUBBLICA CODIFICATA IN X509
