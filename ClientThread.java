@@ -3,12 +3,7 @@ import java.util.*;
 import java.lang.*;
 import java.math.BigInteger;
 import java.util.concurrent.locks.*;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.SSLSocket;
 import java.net.*;
-
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
@@ -80,14 +75,22 @@ public class ClientThread extends Thread {
     public boolean isAccepted(){
         return accepted;
     }
+
+    public String getText (byte[] arr) throws UnsupportedEncodingException
+    {
+        String s = new String( arr, "UTF-8" );
+        return s;
+    }
     
     public void run(){
-        Socket sslcsock;
+        Socket csock;
         ServerSocket ss;
         boolean test;
-        String FName;
-        PrintStream StreamOut=null;
-        BufferedReader Buff=null;
+        String FName = null;
+        ObjectOutputStream StreamOut=null;
+        byte[] Buff = null;
+        ObjectInputStream ois;
+        //        BufferedReader Buff=null;
         BufferedReader stdIn = new BufferedReader ( new InputStreamReader (System.in));
         try{
             
@@ -98,25 +101,34 @@ public class ClientThread extends Thread {
                     
                     
                     ss = new ServerSocket(port);
-                    sslcsock = ss.accept();// Attesa socket
+                    csock = ss.accept();// Attesa socket
                     if(IsConnected())System.exit(0); //whether the user has already connect the process has killed.
-                    StreamOut = new PrintStream (sslcsock.getOutputStream());
-                    Buff = new BufferedReader (new InputStreamReader (sslcsock.getInputStream()));
-                    System.out.print("[CHAT] "+Buff.readLine() + ": "); //accept message
-                    FName = Buff.readLine();
+                   
+                    StreamOut = new ObjectOutputStream( csock.getOutputStream() );
+                    ois = new ObjectInputStream( csock.getInputStream() );
+                    Buff = (byte[]) ois.readObject();
+                    
+                    FName = getText(Buff);
+                    System.out.print("[CHAT] "+ FName + ": "); //accept message
+                    Buff = (byte[]) ois.readObject();
+                    FName = getText(Buff);
+                    
                     sem.lock();
                     connect = true;							
                     WaitCall.await();//wait user decision (see other thread)				
                     sem.unlock();
                     
-                    //Server creates and initializes his DH KeyAgreement object
-                    
-                    
-                    
-                    if(!isAccepted())StreamOut.println("NACK");						
+                    if(!isAccepted())StreamOut.writeObject(("NACK").getBytes());						
                     else {
-                        StreamOut.println(MyName);
+                        StreamOut.writeObject(MyName.getBytes());
                         System.out.println("[CHAT] Connected with " + FName);
+                        //Retrieves the public keys
+                        if(!Rsa.isPresent(FName)){
+                            StreamOut.writeObject(("GIMMEKEY").getBytes());
+                            //retrieve the friend's key
+                            RemoteFile.ReceiveFile(Rsa.UserToPath(FName,Rsa.KEY.PUBLIC),ois);
+                        }
+                        
                         break;
                     }
                 }
@@ -129,30 +141,32 @@ public class ClientThread extends Thread {
                 System.out.println("Trying to connect on port: " + port);
                 if(IsConnected())System.exit(0);
                 
-                sslcsock = new Socket(ip,port);
-                /*SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-                  SSLSocket sslcsock = (SSLSocket) sslsocketfactory.createSocket(ip, port);*/
-                StreamOut = new PrintStream (sslcsock.getOutputStream());
-                Buff = new BufferedReader (new InputStreamReader (sslcsock.getInputStream()));
+                csock = new Socket(ip,port);
+                StreamOut = new ObjectOutputStream( csock.getOutputStream() );
+                ois = new ObjectInputStream( csock.getInputStream() );
                 
-                StreamOut.println(MyName + " : " + ip + " : " + port + " would talk with you, please press \'y\' to accept");
-                StreamOut.println(MyName);
-                
-                FName = Buff.readLine();
+                StreamOut.writeObject((MyName + " : " + ip + " : " + port + " would talk with you, please press \'y\' to accept\n").getBytes());    
+                StreamOut.writeObject(MyName.getBytes());
+
+                Buff = (byte[]) ois.readObject();
+                FName = getText(Buff);
+
                 if(FName.compareTo("NACK")==0){
                     System.out.println("Connection not accepted");
                     System.exit(0);
                 }
+                else if(FName.compareTo("GIMMEKEY")==0){/*Send the public key*/}
                 else System.out.println("[CHAT ]Connected with " + FName);
                 
             }
             
             /*receive messages*/
-            new ReceiveMessage(Buff,FName).start();
+            new ReceiveMessage(ois,FName).start();
             
             /*send messages*/
             while (true)
-                StreamOut.println(new String(Rsa.Encrypt(stdIn.readLine(),MyName)));
+                StreamOut.writeObject(Rsa.Encrypt(stdIn.readLine(),MyName));
+                
         }
         catch (Exception e) {
             System.out.println("[Error] User appears to be offline");

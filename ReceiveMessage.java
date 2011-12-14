@@ -5,32 +5,35 @@ import java.util.*;
 import java.lang.*;
 
 public class ReceiveMessage extends Thread {
-    private BufferedReader input;
+    private  ObjectInputStream input;
     private String name;
 
-    public ReceiveMessage (BufferedReader input,String name){
+    public ReceiveMessage (ObjectInputStream input,String name){
         this.input = input;
         this.name = name;
     }
+
+    public String getText (byte[] arr) throws UnsupportedEncodingException
+    {
+        String s = new String( arr, "UTF-8" );
+        return s;
+    }
     
     public void run(){
-        try{
-            String str1 = null;
-            String str2 = null;
-            while (true){
-                str1 = input.readLine();
-                if(str1==null)break;
-                try{
-                    str2 = Rsa.Decrypt(str1.getBytes(),name);
-                }catch(Exception x){}
-                System.out.println(name + "> " + str2);
+        byte[] data = null;
+        String str = null;
+        while (true){
+            try{
+                data = (byte[])input.readObject();
+                str = Rsa.Decrypt(data,name);
+                if(str==null)break;                
+                System.out.println(name + "> " + str);
                 System.out.flush();
-            }
-            System.out.println(name + " has disconnected");
-            System.exit(0);
+            }catch(Exception x){}            
         }
-        catch (IOException e) {
-            System.out.println("Error on listening");
-        }
+        System.out.println(name + " has disconnected");
+        System.exit(0);
     }
+    
+
 }
