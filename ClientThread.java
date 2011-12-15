@@ -6,23 +6,21 @@ import java.net.*;
 import java.security.*;
 
 public class ClientThread extends Thread {
+    private boolean type;
+    private User usr;
     static boolean  connect;
     static boolean accepted;
     static Lock  sem ;
     static Condition WaitCall; 	
-    private boolean type;
-    private int port;
-    private String ip;
-    private String MyName;
-	
-    public ClientThread (String name,int port, String ip, boolean type)throws IOException{
+    private boolean PresentKey;
+
+    public ClientThread (User usr, boolean type)throws IOException{
         this.sem = new ReentrantLock();
         this.type = type;
-        this.port = port;
-        this.ip = ip;
-        this.MyName = name;
+        this.usr = usr;
         WaitCall = sem.newCondition();
         accepted = false;
+        PresentKey = true;
     }
     
     public boolean IsConnected(){
@@ -72,10 +70,9 @@ public class ClientThread extends Thread {
         return s;
     }
     
-    public void run(){
+    public void run() throws RuntimeException{
         Socket csock;
         ServerSocket ss;
-        boolean test;
         String FName = null;
         ObjectOutputStream StreamOut=null;
         byte[] Buff = null;
@@ -88,7 +85,7 @@ public class ClientThread extends Thread {
                 while(true){
                     resetConnect();
                                         
-                    ss = new ServerSocket(port);
+                    ss = new ServerSocket(usr.getServerPort());
                     csock = ss.accept();// Attesa socket
                     if(IsConnected())System.exit(0); //whether the user has already connect the process has killed.
                    
@@ -100,7 +97,8 @@ public class ClientThread extends Thread {
                     System.out.print("[CHAT] "+ FName + ": "); //accept message
                     Buff = (byte[]) ois.readObject();
                     FName = getText(Buff);
-                    
+                    usr.setFriendName(FName);
+
                     sem.lock();
                     connect = true;							
                     WaitCall.await();//wait user decision (see other thread)				
@@ -108,8 +106,8 @@ public class ClientThread extends Thread {
                     
                     if(!isAccepted())StreamOut.writeObject(("NACK").getBytes());						
                     else {
-                        StreamOut.writeObject(MyName.getBytes());
-                        System.out.println("[CHAT] Connected with " + FName);
+                        StreamOut.writeObject((usr.getUserName()).getBytes());
+                        System.out.println("[CHAT] Connected with " + usr.getFriendName());
                         break;
                     }
                 }
@@ -119,41 +117,46 @@ public class ClientThread extends Thread {
             //client's body
             //receive the name on connect success
             else{
-                System.out.println("Trying to connect on port: " + port);
+                System.out.println("Trying to connect on port: " + usr.getClientPort());
                 if(IsConnected())System.exit(0); //whether the server mode in on, the client mode have to be closed
-                csock = new Socket(ip,port);
+                csock = new Socket(usr.getClientIp(),usr.getClientPort());
                 StreamOut = new ObjectOutputStream( csock.getOutputStream() );
                 ois = new ObjectInputStream( csock.getInputStream() );
                 
-                StreamOut.writeObject(("\n" + MyName + " : " + ip + " : " + port + " would talk with you, please press \'y\' to accept").getBytes());    
-                StreamOut.writeObject(MyName.getBytes());
+                StreamOut.writeObject(("\n" + usr.getUserName() + " would talk with you, please press \'y\' to accept").getBytes());    
+                StreamOut.writeObject((usr.getUserName()).getBytes());
 
                 Buff = (byte[]) ois.readObject();
                 FName = getText(Buff);
-
+                
+                
                 if(FName.compareTo("NACK")==0){
                     System.out.println("[CHAT] Connection not accepted");
                     System.exit(0);
                 }
 
-                else System.out.println("[CHAT] Connected with " + FName);
+                else{/*Initializes the friend's parameters*/
+                    System.out.println("[CHAT] Connected with " + FName);
+                    usr.setFriendName(FName);
+                }
                 
             }
             
-            /*Retrieves both keys to send/receive messages*/
-            PublicKey PuKey = Rsa.GetPublicKey(MyName,FName);
-            PrivateKey PvKey = Rsa.GetPrivateKey(MyName);
-           
+            //gestire meglio, se un utente esce deve farlo anche l'altro.
+            if(!usr.isRsaPresent(usr.getFriendName()))
+                PresentKey = false;
+
             /*receive messages*/
-            new ReceiveMessage(ois,FName,PvKey).start();
+            new ReceiveMessage(ois,usr).start();
             
             /*send messages*/
             while (true)
-                StreamOut.writeObject(Rsa.Encrypt(stdIn.readLine(),PuKey));
+                StreamOut.writeObject(usr.Encrypt(stdIn.readLine()));
                 
         }
         catch (Exception e) {
-            System.out.println("[Error] User appears to be offline");
+            if(PresentKey) System.out.println("[Error] User appears to be offline");
+            else System.out.println("Unable to find public key of " + usr.getFriendName() + ", fecth the key first.");
             System.exit(0);
         }	
     }

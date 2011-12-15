@@ -1,3 +1,7 @@
+/** 
+    This class allows to handle RSA keys.
+ */
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -17,26 +21,36 @@ public class Rsa {
     static final String PRIVATEPATH = "private.key";
     static final String KEYPATH = "/home/badnack/Projects/SecureChat/Ssl-Chat/KeyFiles/";	
     //static final String KEYPATH = "/home/davide/Ssl-Chat/KeyFiles/";
+    private String RegUserName;
 
-    public static String UserToPath(String WhoAmI,String UserName,KEY k){
+    public Rsa(){
+        RegUserName = new String();
+    }
+
+    public void setUserName(String name){
+        this.RegUserName = name;
+    }
+
+    private String UserToPath(String UserName,KEY k){
         if(k==KEY.PUBLIC)
-            return KEYPATH + WhoAmI + "/" + UserName +"_" + PUBLICPATH;
+            return KEYPATH + RegUserName + "/" + UserName +"_" + PUBLICPATH;
+        
         /*For the private key i can return just the own*/
-        return KEYPATH + UserName  + "/" + UserName + "_" + PRIVATEPATH;
+        return KEYPATH + RegUserName  + "/" + RegUserName + "_" + PRIVATEPATH;
     }
 
     //Checks whether a key is present or not
-    public static boolean isPresent(String WhoAmI,String UserName){
+    public boolean isPresent(String UserName){
         try{
-            FileInputStream fis = new FileInputStream(KEYPATH + WhoAmI + UserName + "_" + PUBLICPATH);
+            FileInputStream fis = new FileInputStream(KEYPATH + RegUserName + UserName + "_" + PUBLICPATH);
             fis.close();
         }catch(Exception x){return false; }
         return true;
     }
 
     //Get a public key stored giving the username
-    public static PublicKey GetPublicKey(String WhoAmI,String UserName) throws IOException,InvalidKeySpecException,NoSuchAlgorithmException{
-        String path = UserToPath (WhoAmI,UserName,KEY.PUBLIC);
+    public PublicKey GetPublicKey(String UserName) throws IOException,InvalidKeySpecException,NoSuchAlgorithmException{
+        String path = UserToPath (UserName,KEY.PUBLIC);
         FileInputStream fis = new FileInputStream(path);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int i = 0;
@@ -44,13 +58,8 @@ public class Rsa {
             baos.write(i);
         }
         
-        
         byte[] publicKeyBytes = baos.toByteArray();
         baos.close();
-        
-
-        // CONVERTI CHIAVE PUBBLICA DA X509 A CHIAVE UTILIZZABILE
-        
         // Inizializza convertitore da X.509 a chiave pubblica
         X509EncodedKeySpec ks = new X509EncodedKeySpec(publicKeyBytes);
         // Inizializza un KeyFactory per ricreare la chiave usando RSA 
@@ -60,9 +69,8 @@ public class Rsa {
 
     }
 
-    /*To protect with password?*/
-    public static PrivateKey GetPrivateKey(String UserName) throws IOException,InvalidKeySpecException,NoSuchAlgorithmException{
-        String path = UserToPath (UserName,UserName,KEY.PRIVATE);
+    private PrivateKey GetPrivateKey() throws IOException,InvalidKeySpecException,NoSuchAlgorithmException{
+        String path = UserToPath ("NULL",KEY.PRIVATE);
         
         FileInputStream fis = new FileInputStream(path);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -72,12 +80,7 @@ public class Rsa {
             baos.write(i);
         }
         byte[] privateKeyBytes = baos.toByteArray();
-        baos.close();
-        
-        
-        
-        // CONVERTI CHIAVE PRIVATA PKCS8 IN CHIAVE NORMALE
-        
+        baos.close();                       
         PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(privateKeyBytes);
         KeyFactory kf = KeyFactory.getInstance("RSA");
        return kf.generatePrivate(ks);
@@ -85,15 +88,11 @@ public class Rsa {
     }
 
 
-    public static byte[] Encrypt(String data, PublicKey publicKey) throws Exception {
-        
+    public byte[] Encrypt(String data, PublicKey publicKey) throws Exception {        
         byte[] plainFile;
-        plainFile=data.getBytes();
-        
-        
+        plainFile=data.getBytes();               
         // Inizializzo un cifrario che usa come algoritmo RSA, come modalita' ECB e come padding PKCS1
-        Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        
+        Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");        
         // Lo inizializzo dicendo modalita' di codifica e chiave pubblica da usare
         c.init(Cipher.ENCRYPT_MODE, publicKey);
         // codifico e metto il risultato in encodeFile
@@ -101,24 +100,21 @@ public class Rsa {
         return encodeData;
     }
     
-    public static String Decrypt(byte[] sorg ,PrivateKey privateKey) throws Exception{
-        
+    public String Decrypt(byte[] sorg) throws Exception{        
         // DECODIFICA
-        
+        PrivateKey privateKey = GetPrivateKey();
         Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        c.init(Cipher.DECRYPT_MODE, privateKey);
-        
-        byte[] plainFile = c.doFinal(sorg);
-        
+        c.init(Cipher.DECRYPT_MODE, privateKey);        
+        byte[] plainFile = c.doFinal(sorg);        
         // DA BYTE[] A STRING
         StringBuilder sb = new StringBuilder (plainFile.length);
         for (byte b: plainFile)
-            sb.append ((char) b);
-        
+            sb.append ((char) b);        
         return sb.toString();
     }
     
-    public static void createKeys(String UserName) throws Exception {
+    public void createKeys() throws Exception {
+        String UserName = RegUserName;
         boolean Exists = true;
         // GENERA COPPIA DI CHIAVI
         try{
@@ -129,16 +125,14 @@ public class Rsa {
         }
         
         if(Exists) return;
-        
-        
+                
         //inizializza un generatore di coppie di chiavi usando RSA
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(1024);
         // genera la coppia
         KeyPair kp = kpg.generateKeyPair();
         
-        // SALVA CHIAVE PUBBLICA
-        
+        // SALVA CHIAVE PUBBLICA        
         byte[] publicBytes = kp.getPublic().getEncoded();
         // salva nel keystore selezionato dall'utente
         FileOutputStream fos = new FileOutputStream( KEYPATH + UserName + "/" + UserName + "_" + PUBLICPATH);
@@ -146,11 +140,7 @@ public class Rsa {
         fos.write(publicBytes);
         fos.close();
         
-        // SALVA CHIAVE PRIVATA
-        
-        // ottieni la versione codificata in PKCS#8
-        byte[] privateBytes = kp.getPrivate().getEncoded();
-        
+        byte[] privateBytes = kp.getPrivate().getEncoded();        
         fos = new FileOutputStream(KEYPATH + UserName + "/" + UserName + "_" + PRIVATEPATH);
         fos.write(privateBytes);
         fos.close();

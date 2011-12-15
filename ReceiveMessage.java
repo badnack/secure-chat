@@ -6,12 +6,13 @@ import java.security.*;
 
 public class ReceiveMessage extends Thread {
     private  ObjectInputStream input;
-    private String name;
     private PrivateKey PvKey;
-    public ReceiveMessage (ObjectInputStream input,String name,PrivateKey PvKey){
+    private User usr;
+    private Rsa rsa;
+    
+    public ReceiveMessage (ObjectInputStream input,User usr){
+        this.usr = usr;
         this.input = input;
-        this.name = name;
-        this.PvKey = PvKey;
     }
 
     public String getText (byte[] arr) throws UnsupportedEncodingException
@@ -26,13 +27,13 @@ public class ReceiveMessage extends Thread {
         while (true){
             try{
                 data = (byte[])input.readObject();
-                str = Rsa.Decrypt(data,PvKey);
+                str = usr.Decrypt(data);
                 if(str==null)break;                
-                System.out.println(name + "> " + str);
+                System.out.println(usr.getUserName() + "> " + str);
                 System.out.flush();
             }catch(Exception x){}            
         }
-        System.out.println(name + " has disconnected");
+        System.out.println(usr.getUserName() + " has disconnected");
         System.exit(0);
     }
     

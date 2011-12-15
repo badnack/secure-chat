@@ -7,6 +7,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
 
 public class Client {
+    static final String LOCALHOST = "127.0.0.1";
     // static final String DIRPATH = "/home/badnack/Project/SecureChat/Ssl-Chat/KeyFiles/"
     static final int PORTC = 1234;
 
@@ -18,21 +19,24 @@ public class Client {
     }
 
     public static void main (String args[]){
+        User user;
+        Rsa rsa = new Rsa();
         String str;
-        String name;
         int port;
         ClientThread ct,cc;
         BufferedReader stdIn = new BufferedReader ( new InputStreamReader (System.in));
         try{
             port = Integer.parseInt(args[0]);
             System.out.print("[CHAT] Nickname: ");
-            name = stdIn.readLine();
-            MakeDir(name);
+            str = stdIn.readLine();
+            MakeDir(str);
+            user = new User(str,port,LOCALHOST);
             
+            //Sets rsa parameters
             /*Checks whether file keys already exists, in other case has created*/
-            Rsa.createKeys(name);
+            user.CreateRsa();
             
-            ct = new ClientThread (name,port,"127.0.0.1",true);
+            ct = new ClientThread (user,true);
             ct.start();
             
             /*Message board shared by two threads */
@@ -55,21 +59,22 @@ public class Client {
                     continue;
                 }
                 
-                
                 port = PORTC;
                 try {
                     port = Integer.parseInt(str);
-                } 
-                
-                catch (Exception e) {
+                }catch (Exception e) {
                     System.out.println("[Error] Unable to open the port given.");
                     continue;
                 }
+
+                /*Connection parameters*/
+                user.setClientPort(port);
+                user.setClientIp(LOCALHOST); // da cambiare con l'ip di destinazione
                 
                 
                 /* If i try to connect i start the client mode, 
                    therefore i close the server thread */
-                cc = new ClientThread (name,port,"127.0.0.1",false);
+                cc = new ClientThread (user,false);
                 cc.start();
                 break;
                 
@@ -78,11 +83,9 @@ public class Client {
         }
         
         catch(Exception e){
-            System.out.println("Eccezione");
+            System.out.println("[CHAT] Unhandled error!");
         }				
         
         
-    } // end metodo
-    
-} // end class
-
+    } 
+} 
