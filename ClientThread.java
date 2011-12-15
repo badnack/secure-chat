@@ -155,8 +155,12 @@ public class ClientThread extends Thread {
                 
         }
         catch (Exception e) {
-            if(PresentKey) System.out.println("[Error] User appears to be offline");
-            else System.out.println("Unable to find public key of " + usr.getFriendName() + ", fecth the key first.");
+            if(PresentKey){ 
+                System.out.println("[Error] User appears to be offline");
+                System.err.println(e.getMessage());
+            }
+
+            else System.out.println("Unable to find public key of " + usr.getFriendName() + ", fecth the key first.");            
             System.exit(0);
         }	
     }

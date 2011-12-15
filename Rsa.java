@@ -14,23 +14,33 @@ import java.io.IOException;
 import java.security.spec.InvalidKeySpecException;
 import javax.crypto.Cipher;
 import java.security.NoSuchAlgorithmException;
-
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.BadPaddingException;
+import javax.crypto.NoSuchPaddingException;
 public class Rsa {
     public enum KEY {PRIVATE,PUBLIC};
+    static final String REQPRIVATEKEY = "null";
     static final String PUBLICPATH = "public.key";
     static final String PRIVATEPATH = "private.key";
-    final String KEYPATH; 	
+    private String KEYPATH; 	
     private String RegUserName;
 
     public Rsa(String KeyDirectory){
-        RegUserName = new String();
+        RegUserName = null;
         KEYPATH =  KeyDirectory;
     }
 
+    public void setKeyDirectory(String KeyDirectory){
+            KEYPATH =  KeyDirectory;
+    }
+    
+    /**Set the keys owner
+       this function should be called after a login to protect the key from others*/
     public void setUserName(String name){
         this.RegUserName = name;
     }
 
+    /**This method retrieves the keys path by user name*/
     private String UserToPath(String UserName,KEY k){
         if(k==KEY.PUBLIC)
             return KEYPATH + RegUserName + "/" + UserName +"_" + PUBLICPATH;
@@ -39,7 +49,7 @@ public class Rsa {
         return KEYPATH + RegUserName  + "/" + RegUserName + "_" + PRIVATEPATH;
     }
 
-    //Checks whether a key is present or not
+    /** Checks whether a public key is present */
     public boolean isPresent(String UserName){
         try{
             FileInputStream fis = new FileInputStream(KEYPATH + RegUserName + UserName + "_" + PUBLICPATH);
@@ -70,7 +80,7 @@ public class Rsa {
     }
 
     private PrivateKey GetPrivateKey() throws IOException,InvalidKeySpecException,NoSuchAlgorithmException{
-        String path = UserToPath ("NULL",KEY.PRIVATE);
+        String path = UserToPath (REQPRIVATEKEY,KEY.PRIVATE);
         
         FileInputStream fis = new FileInputStream(path);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -88,7 +98,11 @@ public class Rsa {
     }
 
 
-    public byte[] Encrypt(String data, PublicKey publicKey) throws Exception {        
+    public byte[] Encrypt(String data, PublicKey publicKey) throws IllegalBlockSizeException,
+                                                                   InvalidKeyException,
+                                                                   NoSuchAlgorithmException,
+                                                                   BadPaddingException,
+                                                                   NoSuchPaddingException {       
         byte[] plainFile;
         plainFile=data.getBytes();               
         // Inizializzo un cifrario che usa come algoritmo RSA, come modalita' ECB e come padding PKCS1
@@ -100,7 +114,13 @@ public class Rsa {
         return encodeData;
     }
     
-    public String Decrypt(byte[] sorg) throws Exception{        
+    public String Decrypt(byte[] sorg) throws IOException, 
+                                              InvalidKeyException,
+                                              NoSuchAlgorithmException,
+                                              InvalidKeySpecException,
+                                              NoSuchPaddingException,
+                                              IllegalBlockSizeException,
+                                              BadPaddingException{        
         // DECODIFICA
         PrivateKey privateKey = GetPrivateKey();
         Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
@@ -113,7 +133,7 @@ public class Rsa {
         return sb.toString();
     }
     
-    public void createKeys() throws Exception {
+    public void createKeys() throws IOException,NoSuchAlgorithmException {
         String UserName = RegUserName;
         boolean Exists = true;
         // GENERA COPPIA DI CHIAVI
