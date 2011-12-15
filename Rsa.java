@@ -18,24 +18,25 @@ public class Rsa {
     static final String KEYPATH = "/home/badnack/Projects/SecureChat/Ssl-Chat/KeyFiles/";	
     //static final String KEYPATH = "/home/davide/Ssl-Chat/KeyFiles/";
 
-    public static String UserToPath(String UserName,KEY k){
-          if(k==KEY.PUBLIC)
-            return KEYPATH + UserName + "_" + PUBLICPATH;
-            return KEYPATH + UserName + "_" + PRIVATEPATH;
+    public static String UserToPath(String WhoAmI,String UserName,KEY k){
+        if(k==KEY.PUBLIC)
+            return KEYPATH + WhoAmI + "/" + UserName +"_" + PUBLICPATH;
+        /*For the private key i can return just the own*/
+        return KEYPATH + UserName  + "/" + UserName + "_" + PRIVATEPATH;
     }
 
     //Checks whether a key is present or not
-    public static boolean isPresent(String UserName){
+    public static boolean isPresent(String WhoAmI,String UserName){
         try{
-            FileInputStream fis = new FileInputStream(KEYPATH + UserName + "_" + PUBLICPATH);
+            FileInputStream fis = new FileInputStream(KEYPATH + WhoAmI + UserName + "_" + PUBLICPATH);
             fis.close();
         }catch(Exception x){return false; }
         return true;
     }
 
     //Get a public key stored giving the username
-    public static PublicKey GetPublicKey(String UserName) throws IOException,InvalidKeySpecException,NoSuchAlgorithmException{
-        String path = KEYPATH + UserName + "_" + PUBLICPATH;
+    public static PublicKey GetPublicKey(String WhoAmI,String UserName) throws IOException,InvalidKeySpecException,NoSuchAlgorithmException{
+        String path = UserToPath (WhoAmI,UserName,KEY.PUBLIC);
         FileInputStream fis = new FileInputStream(path);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int i = 0;
@@ -61,7 +62,8 @@ public class Rsa {
 
     /*To protect with password?*/
     public static PrivateKey GetPrivateKey(String UserName) throws IOException,InvalidKeySpecException,NoSuchAlgorithmException{
-        String path = KEYPATH + UserName + "_" + PRIVATEPATH;        
+        String path = UserToPath (UserName,UserName,KEY.PRIVATE);
+        
         FileInputStream fis = new FileInputStream(path);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         
@@ -120,7 +122,7 @@ public class Rsa {
         boolean Exists = true;
         // GENERA COPPIA DI CHIAVI
         try{
-            FileInputStream fis = new FileInputStream(KEYPATH + UserName + "_" + PUBLICPATH);
+            FileInputStream fis = new FileInputStream(KEYPATH + UserName + "/" + UserName + "_" + PUBLICPATH);
         }catch(Exception x){
             //creates a key file to store keys
             Exists = false;
@@ -139,7 +141,7 @@ public class Rsa {
         
         byte[] publicBytes = kp.getPublic().getEncoded();
         // salva nel keystore selezionato dall'utente
-        FileOutputStream fos = new FileOutputStream( KEYPATH + UserName + "_" + PUBLICPATH);
+        FileOutputStream fos = new FileOutputStream( KEYPATH + UserName + "/" + UserName + "_" + PUBLICPATH);
         
         fos.write(publicBytes);
         fos.close();
@@ -149,7 +151,7 @@ public class Rsa {
         // ottieni la versione codificata in PKCS#8
         byte[] privateBytes = kp.getPrivate().getEncoded();
         
-        fos = new FileOutputStream(KEYPATH + UserName + "_" + PRIVATEPATH);
+        fos = new FileOutputStream(KEYPATH + UserName + "/" + UserName + "_" + PRIVATEPATH);
         fos.write(privateBytes);
         fos.close();
     }

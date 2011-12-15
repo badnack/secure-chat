@@ -1,21 +1,11 @@
 import java.io.*;
 import java.util.*;
 import java.lang.*;
-import java.math.BigInteger;
 import java.util.concurrent.locks.*;
 import java.net.*;
-import javax.crypto.Cipher;
-import javax.crypto.KeyAgreement;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.DHParameterSpec;
 import java.security.*;
 
-
-
-
 public class ClientThread extends Thread {
-    private final int TIMEOUT = 500;
     static boolean  connect;
     static boolean accepted;
     static Lock  sem ;
@@ -24,7 +14,6 @@ public class ClientThread extends Thread {
     private int port;
     private String ip;
     private String MyName;
-    static SecretKey desKey;
 	
     public ClientThread (String name,int port, String ip, boolean type)throws IOException{
         this.sem = new ReentrantLock();
@@ -34,7 +23,6 @@ public class ClientThread extends Thread {
         this.MyName = name;
         WaitCall = sem.newCondition();
         accepted = false;
-        
     }
     
     public boolean IsConnected(){
@@ -44,6 +32,7 @@ public class ClientThread extends Thread {
         sem.unlock();
         return test;
     }
+
     public void signalConnected(){
         sem.lock();
         try{
@@ -91,7 +80,6 @@ public class ClientThread extends Thread {
         ObjectOutputStream StreamOut=null;
         byte[] Buff = null;
         ObjectInputStream ois;
-        //        BufferedReader Buff=null;
         BufferedReader stdIn = new BufferedReader ( new InputStreamReader (System.in));
         try{
             
@@ -99,8 +87,7 @@ public class ClientThread extends Thread {
             if(type){
                 while(true){
                     resetConnect();
-                    
-                    
+                                        
                     ss = new ServerSocket(port);
                     csock = ss.accept();// Attesa socket
                     if(IsConnected())System.exit(0); //whether the user has already connect the process has killed.
@@ -123,14 +110,6 @@ public class ClientThread extends Thread {
                     else {
                         StreamOut.writeObject(MyName.getBytes());
                         System.out.println("[CHAT] Connected with " + FName);
-                        //Retrieves the public keys
-                        /*if(!Rsa.isPresent(FName)){
-                            StreamOut.writeObject(("GIMMEKEY").getBytes());
-                            //retrieve the friend's key
-                            RemoteFile.ReceiveFile(Rsa.UserToPath(FName,Rsa.KEY.PUBLIC),ois);
-                            RemoteFile.SendFile(Rsa.UserToPath(MyName,Rsa.KEY.PUBLIC),StreamOut);
-                            }*/
-                        
                         break;
                     }
                 }
@@ -141,32 +120,28 @@ public class ClientThread extends Thread {
             //receive the name on connect success
             else{
                 System.out.println("Trying to connect on port: " + port);
-                if(IsConnected())System.exit(0);
-                
+                if(IsConnected())System.exit(0); //whether the server mode in on, the client mode have to be closed
                 csock = new Socket(ip,port);
                 StreamOut = new ObjectOutputStream( csock.getOutputStream() );
                 ois = new ObjectInputStream( csock.getInputStream() );
                 
-                StreamOut.writeObject((MyName + " : " + ip + " : " + port + " would talk with you, please press \'y\' to accept\n").getBytes());    
+                StreamOut.writeObject(("\n" + MyName + " : " + ip + " : " + port + " would talk with you, please press \'y\' to accept").getBytes());    
                 StreamOut.writeObject(MyName.getBytes());
 
                 Buff = (byte[]) ois.readObject();
                 FName = getText(Buff);
 
                 if(FName.compareTo("NACK")==0){
-                    System.out.println("Connection not accepted");
+                    System.out.println("[CHAT] Connection not accepted");
                     System.exit(0);
                 }
-                else if(FName.compareTo("GIMMEKEY")==0){/*Send the public key*/
-                    RemoteFile.SendFile(Rsa.UserToPath(MyName,Rsa.KEY.PUBLIC),StreamOut);
-                    RemoteFile.ReceiveFile(Rsa.UserToPath(FName,Rsa.KEY.PUBLIC),ois);
-                    
-                }
-                else System.out.println("[CHAT ]Connected with " + FName);
+
+                else System.out.println("[CHAT] Connected with " + FName);
                 
             }
             
-            PublicKey PuKey = Rsa.GetPublicKey(FName);
+            /*Retrieves both keys to send/receive messages*/
+            PublicKey PuKey = Rsa.GetPublicKey(MyName,FName);
             PrivateKey PvKey = Rsa.GetPrivateKey(MyName);
            
             /*receive messages*/
