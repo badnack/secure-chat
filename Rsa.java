@@ -19,12 +19,12 @@ public class Rsa {
     public enum KEY {PRIVATE,PUBLIC};
     static final String PUBLICPATH = "public.key";
     static final String PRIVATEPATH = "private.key";
-    static final String KEYPATH = "/home/badnack/Projects/SecureChat/Ssl-Chat/KeyFiles/";	
-    //static final String KEYPATH = "/home/davide/Ssl-Chat/KeyFiles/";
+    final String KEYPATH; 	
     private String RegUserName;
 
-    public Rsa(){
+    public Rsa(String KeyDirectory){
         RegUserName = new String();
+        KEYPATH =  KeyDirectory;
     }
 
     public void setUserName(String name){

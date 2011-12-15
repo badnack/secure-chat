@@ -1,18 +1,6 @@
-import java.io.*;
-import java.util.*;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStreamReader;
-import java.security.*;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.io.IOException;
-import java.security.spec.InvalidKeySpecException;
-import javax.crypto.Cipher;
-import java.security.NoSuchAlgorithmException;
-
+/**
+   This classe allows to manage users' account
+*/
 
 class User{
     private String UserName;
@@ -23,12 +11,11 @@ class User{
     private int clientPort;
     private Rsa rsa;
 
-    public User(String name, int port,String server){
+    public User(String name, int port,String server,String KeyDir){
         this.UserName = name;
         this.serverPort = port;
         this.serverIp = server;
-        rsa = new Rsa();
-       
+        rsa = new Rsa(KeyDir);  
     }
 
     public void setClientPort(int port){
@@ -51,6 +38,9 @@ class User{
         this.serverIp = server;
     }
 
+    public String getUserName(){
+        return UserName;
+    }
 
     public String getFriendName(){
         return FriendName;
@@ -63,7 +53,16 @@ class User{
         return clientIp;
     }
     
+    public int getServerPort(){
+        return serverPort;
+    }
+   
+    public String getServerIp(){
+        return this.serverIp;
+    } 
+    
 
+    /**RSA methods*/
     public void CreateRsa() throws Exception{
         rsa.setUserName(UserName);
         rsa.createKeys();
@@ -79,19 +78,4 @@ class User{
     public byte[] Encrypt(String data) throws Exception{        
         return rsa.Encrypt(data,rsa.GetPublicKey(FriendName));
     }
-
-   
-    public String getUserName(){
-        return UserName;
-    }
-
-    
-    public int getServerPort(){
-        return serverPort;
-    }
-   
-    public String getServerIp(){
-        return this.serverIp;
-    } 
-    
 }

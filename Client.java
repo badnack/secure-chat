@@ -8,19 +8,18 @@ import javax.net.ssl.SSLSocket;
 
 public class Client {
     static final String LOCALHOST = "127.0.0.1";
-    // static final String DIRPATH = "/home/badnack/Project/SecureChat/Ssl-Chat/KeyFiles/"
+    static final String KEYDIRECTORY = "/home/badnack/Projects/SecureChat/Ssl-Chat/KeyFiles/";
     static final int PORTC = 1234;
 
     public static void MakeDir(String name){
         try{
-            Directory.MakeDirectory(Rsa.KEYPATH + name);
+            Directory.MakeDirectory(KEYDIRECTORY + name);
         }catch(IOException x ){System.exit(-1);}
 
     }
 
     public static void main (String args[]){
         User user;
-        Rsa rsa = new Rsa();
         String str;
         int port;
         ClientThread ct,cc;
@@ -30,7 +29,7 @@ public class Client {
             System.out.print("[CHAT] Nickname: ");
             str = stdIn.readLine();
             MakeDir(str);
-            user = new User(str,port,LOCALHOST);
+            user = new User(str,port,LOCALHOST,KEYDIRECTORY);
             
             //Sets rsa parameters
             /*Checks whether file keys already exists, in other case has created*/
