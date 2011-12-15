@@ -66,6 +66,7 @@ public class Client {
                     continue;
                 }
 
+                
                 /*Connection parameters*/
                 user.setClientPort(port);
                 user.setClientIp(LOCALHOST); // da cambiare con l'ip di destinazione
