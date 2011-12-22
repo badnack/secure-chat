@@ -98,13 +98,13 @@ public class Rsa {
     }
 
 
-    public byte[] Encrypt(String data, PublicKey publicKey) throws IllegalBlockSizeException,
+    public byte[] Encrypt(byte[] data, PublicKey publicKey) throws IllegalBlockSizeException,
                                                                    InvalidKeyException,
                                                                    NoSuchAlgorithmException,
                                                                    BadPaddingException,
                                                                    NoSuchPaddingException {       
-        byte[] plainFile;
-        plainFile=data.getBytes();               
+        byte[] plainFile=data;
+        //plainFile=data.getBytes();               
         // Inizializzo un cifrario che usa come algoritmo RSA, come modalita' ECB e come padding PKCS1
         Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");        
         // Lo inizializzo dicendo modalita' di codifica e chiave pubblica da usare
@@ -114,7 +114,7 @@ public class Rsa {
         return encodeData;
     }
     
-    public String Decrypt(byte[] sorg) throws IOException, 
+    public byte[] Decrypt(byte[] sorg) throws IOException, 
                                               InvalidKeyException,
                                               NoSuchAlgorithmException,
                                               InvalidKeySpecException,
@@ -126,11 +126,12 @@ public class Rsa {
         Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         c.init(Cipher.DECRYPT_MODE, privateKey);        
         byte[] plainFile = c.doFinal(sorg);        
-        // DA BYTE[] A STRING
+        /*// DA BYTE[] A STRING
         StringBuilder sb = new StringBuilder (plainFile.length);
         for (byte b: plainFile)
             sb.append ((char) b);        
-        return sb.toString();
+        return sb.toString();*/
+        return plainFile;
     }
     
     public void createKeys() throws IOException,NoSuchAlgorithmException {

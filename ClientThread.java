@@ -5,6 +5,9 @@ import java.util.concurrent.locks.*;
 import java.net.*;
 import java.security.*;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 public class ClientThread extends Thread {
     private boolean type;
     private User usr;
@@ -108,8 +111,16 @@ public class ClientThread extends Thread {
                     else {
                         StreamOut.writeObject((usr.getUserName()).getBytes());
                         System.out.println("[CHAT] Connected with " + usr.getFriendName());
-                        break;
+                        //break;
                     }
+                    System.out.println("creo chiave");
+                    /**creation of the session key by the server*/
+                    usr.CreateDes(false, null);
+                    System.out.println("chiave creata");
+                    /**Send the session key to the client*/
+                    StreamOut.writeObject(usr.Encrypt(usr.getDesKey().getEncoded()));
+                    //deve creare la chiave DES e inviare il tutto al client
+                    System.out.println("chiave inviata");
                 }
                 
             }
@@ -139,19 +150,26 @@ public class ClientThread extends Thread {
                     System.out.println("[CHAT] Connected with " + FName);
                     usr.setFriendName(FName);
                 }
+                System.out.println("dovrei ricevere chiave");
+                //deve ricevere dal server la chiave e creare una sua istanza con i parametri
+                /**Receive the session key from the server*/
+                Buff = (byte[]) ois.readObject();
+                byte[] buff2= usr.Decrypt(Buff);
+                SecretKey key = new SecretKeySpec(buff2, "DESede");
                 
+                /**Creation of the session key by the client */
+                usr.CreateDes(true, key);
+                System.out.println("chiave ricevuta");
+
             }
-            
             //gestire meglio, se un utente esce deve farlo anche l'altro.
             if(!usr.isRsaPresent(usr.getFriendName()))
                 PresentKey = false;
-
             /*receive messages*/
             new ReceiveMessage(ois,usr).start();
-            
             /*send messages*/
             while (true)
-                StreamOut.writeObject(usr.Encrypt(stdIn.readLine()));
+                StreamOut.writeObject(usr.DesEncrypt(stdIn.readLine()));
                 
         }
         catch (Exception e) {

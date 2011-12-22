@@ -27,7 +27,7 @@ public class ReceiveMessage extends Thread {
         while (true){
             try{
                 data = (byte[])input.readObject();
-                str = usr.Decrypt(data);
+                str = usr.DesDecrypt(data);
                 if(str==null)break;                
                 System.out.println(usr.getUserName() + "> " + str);
                 System.out.flush();

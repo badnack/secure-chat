@@ -10,7 +10,8 @@ import java.util.Enumeration;
 
 public class SecureLogin{
     static final int ITERATION = 1000;
-    static final String CREDENTIALSPATH = "/home/badnack/Projects/SecureChat/Ssl-Chat/Credentials/";
+    //static final String CREDENTIALSPATH = "/home/badnack/Projects/SecureChat/Ssl-Chat/Credentials/";
+    static final String CREDENTIALSPATH = "/home/davide/Ssl-Chat/Credentials/";
     static final String FILENAME = "passwd";
     
     /**Retrieves a string from a bytes array

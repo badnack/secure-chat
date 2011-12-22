@@ -1,3 +1,11 @@
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+
 /**
    This classe allows to manage users' account
 */
@@ -10,6 +18,7 @@ class User{
     private int serverPort;
     private int clientPort;
     private Rsa rsa;
+    private Des des;
 
     public User(String name, int port,String server,String KeyDir){
         this.UserName = name;
@@ -71,11 +80,45 @@ class User{
     public boolean isRsaPresent(String UserName){
         return  rsa.isPresent(UserName);
     }
-    public String Decrypt(byte[] data) throws Exception{
+    public byte[] Decrypt(byte[] data) throws Exception{
         return rsa.Decrypt(data);
     }
 
-    public byte[] Encrypt(String data) throws Exception{        
+    public byte[] Encrypt(byte[] data) throws Exception{        
         return rsa.Encrypt(data,rsa.GetPublicKey(FriendName));
     }
+    
+    /**DES Create method 
+     * @throws NoSuchAlgorithmException
+     * se accetta il valore nulla per la chiave si può eliminare il booleano */
+    public void CreateDes(boolean exist, SecretKey key) throws NoSuchAlgorithmException{
+    	if(exist) des = new Des(key); //create session key for the client
+    	else des = new Des(); //create session key for the server
+    }
+    
+    /**DES Decrypt method
+     * @throws BadPaddingException 
+     * @throws IllegalBlockSizeException 
+     * @throws NoSuchPaddingException 
+     * @throws NoSuchAlgorithmException 
+     * @throws InvalidKeyException */
+    public String DesDecrypt(byte[] EcnryptData) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException{
+    	return des.DesDecrypt(EcnryptData);
+    }
+    
+    /**DES Encrypt method
+     * @throws BadPaddingException 
+     * @throws IllegalBlockSizeException 
+     * @throws NoSuchPaddingException 
+     * @throws NoSuchAlgorithmException 
+     * @throws InvalidKeyException */
+    public byte[] DesEncrypt(String ClearData) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException{
+    	return des.DesEncrypt(ClearData);
+    }
+    
+    /**Return DES session key method*/
+    public SecretKey getDesKey(){
+    	return des.getSessionKey();
+    }
+    
 }
