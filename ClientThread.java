@@ -143,14 +143,14 @@ public class ClientThread extends Thread {
                 
             }
             DiffieHellman df = new DiffieHellman ();
-	    SecretKey key = df.genKeystream("/home/davide/SecureChat/KeyFiles/PrimeDH/Prime",StreamOut,ois);
-	    //SecretKey key = df.genKeystream("/home/badnack/Projects/SecureChat/Ssl-Chat/KeyFiles/PrimeDH/Prime",StreamOut,ois);
-	    usr.desInstance(key);
+            //	    SecretKey key = df.genKeystream("/home/davide/SecureChat/KeyFiles/PrimeDH/Prime",StreamOut,ois);
+            SecretKey key = df.genKeystream("/home/badnack/Projects/SecureChat/SecureChat/secure-chat/KeyFiles/PrimeDH/Prime",StreamOut,ois);
+            usr.desInstance(key);
 
             //gestire meglio, se un utente esce deve farlo anche l'altro.
             if(!usr.isRsaPresent(usr.getFriendName()))
-                PresentKey = false;
-
+              PresentKey = false;
+            else PresentKey = true;
             /*receive messages*/
             new ReceiveMessage(ois,usr).start();
             

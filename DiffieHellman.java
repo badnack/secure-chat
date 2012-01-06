@@ -18,7 +18,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.FileReader;
 class DiffieHellman{
-    static final int LENGTH_RANDOM_EXPONENT = 300;
+    static final int LENGTH_RANDOM_EXPONENT = 200;
     
    
     String[] values; //prendo p e g da un file
@@ -61,10 +61,10 @@ class DiffieHellman{
             // Get the generated public and private keys
             PrivateKey privateKey = keypair.getPrivate();
             PublicKey publicKey = keypair.getPublic();
-        
+          
             // Send the public key bytes to the other party...
             StreamOut.writeObject(publicKey.getEncoded());
-
+  
             // Retrieve the public key bytes of the other party
             //publicKeyBytes = ...;
             publicKeyBytes = (byte[])StreamIn.readObject();
@@ -78,17 +78,15 @@ class DiffieHellman{
             KeyAgreement ka = KeyAgreement.getInstance("DH");
             ka.init(privateKey);
             ka.doPhase(publicKey, true);
-            
             // Specify the type of key to generate;
             // see Listing All Available Symmetric Key Generators
-            String algorithm = "DES";
+            String algorithm = "DESede";
         
             // Generate the secret key
             SecretKey secretKey = ka.generateSecret(algorithm);
             valid = true;
             return secretKey;
-            // Use the secret key to encrypt/decrypt data;
-            // see Encrypting a String with DES
+           
         } 
         catch (java.security.InvalidKeyException e) {
         } catch (java.security.spec.InvalidKeySpecException e) {

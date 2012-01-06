@@ -60,8 +60,9 @@ public class Rsa {
 
     /** Checks whether a public key is present */
     public boolean isPresent(String UserName){
+        System.out.println(UserToPath(UserName,KEY.PUBLIC));
         try{
-            FileInputStream fis = new FileInputStream(KEYPATH + RegUserName + UserName + "_" + PUBLICPATH);
+            FileInputStream fis = new FileInputStream(UserToPath(UserName,KEY.PUBLIC));
             fis.close();
         }catch(Exception x){return false; }
         return true;
@@ -183,8 +184,12 @@ public class Rsa {
         return sigBytes;
     }
 
-    //da fare
-    public boolean CheckSign(String message) throws SignatureException,InvalidKeyException,IOException,NoSuchAlgorithmException,InvalidKeySpecException{
+    public boolean CheckSign(byte[] message,String UserName) throws SignatureException,InvalidKeyException,IOException,NoSuchAlgorithmException,InvalidKeySpecException{
+        Signature sig = Signature.getInstance("SHA1withRSA");
+        byte[] sigBytes;// = sig.sign();
+        sig.initVerify(GetPublicKey(UserName));
+        sig.update(message);
+        //        System.out.println(sig.verify(sigBytes));
         return true;
     }
 }
