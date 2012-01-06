@@ -60,7 +60,6 @@ public class Rsa {
 
     /** Checks whether a public key is present */
     public boolean isPresent(String UserName){
-        System.out.println(UserToPath(UserName,KEY.PUBLIC));
         try{
             FileInputStream fis = new FileInputStream(UserToPath(UserName,KEY.PUBLIC));
             fis.close();
