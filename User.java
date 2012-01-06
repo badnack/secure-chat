@@ -4,6 +4,10 @@
 */
 
 import javax.crypto.SecretKey;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
+import java.security.SignatureException;
 
 class User{
     private String UserName;
@@ -16,7 +20,8 @@ class User{
     private Rsa rsa;
     private Des des;
     private boolean valid;
-    
+    private DiffieHellman dh;
+
     /*This class must be called after the login using SecureLogin class.
      Indeed the main constructor uses a SecureLogin object to identify an user.
     */
@@ -84,6 +89,12 @@ class User{
         rsa.createKeys();
         return true;
     }
+
+    public SecretKey createDiffieHellman(String path,ObjectOutputStream StreamOut,ObjectInputStream ois) throws IOException,SignatureException{
+        dh = new DiffieHellman (rsa);
+        return dh.genKeystream(path,StreamOut,ois,FriendName);
+        
+    }
     
     public boolean isRsaPresent(String UserName){
         return  rsa.isPresent(UserName);
@@ -98,14 +109,14 @@ class User{
 
     /**DES methods */
     public boolean desInstance (SecretKey key){
-	des = new Des(key);
-	return true;
+        des = new Des(key);
+        return true;
     }    
 
     public String Decrypt(byte[] data) throws Exception{
         return des.DesDecrypt(data);
     }
-
+    
     public byte[] Encrypt(String data) throws Exception{        
         return des.DesEncrypt(data);
     }

@@ -179,18 +179,32 @@ public class Rsa {
         Signature sig = Signature.getInstance("SHA1withRSA");
         sig.initSign(GetPrivateKey());
         sig.update(message.getBytes());
-        byte[] sigBytes = sig.sign();
-        return sigBytes;
+        return sig.sign();
     }
 
-    public boolean CheckSign(byte[] message,String UserName) throws SignatureException,InvalidKeyException,IOException,NoSuchAlgorithmException,InvalidKeySpecException{
+    public boolean CheckSign(byte[] message,byte[] sign, String UserName) throws SignatureException,InvalidKeyException,IOException,NoSuchAlgorithmException,InvalidKeySpecException{
         Signature sig = Signature.getInstance("SHA1withRSA");
-        byte[] sigBytes;// = sig.sign();
         sig.initVerify(GetPublicKey(UserName));
         sig.update(message);
-        //        System.out.println(sig.verify(sigBytes));
-        return true;
+        return sig.verify(sign);
+      
     }
+
+
+    /*public static byte[] signData(byte[] data, PrivateKey key) throws Exception {
+    Signature signer = Signature.getInstance("SHA1withDSA");
+    signer.initSign(key);
+    signer.update(data);
+    return (signer.sign());
+  }
+
+  public static boolean verifySig(byte[] data, PublicKey key, byte[] sig) throws Exception {
+    Signature signer = Signature.getInstance("SHA1withDSA");
+    signer.initVerify(key);
+    signer.update(data);
+    return (signer.verify(sig));
+
+  }*/
 }
 
 

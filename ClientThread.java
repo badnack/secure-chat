@@ -7,6 +7,7 @@ import java.security.*;
 import javax.crypto.SecretKey;
 
 public class ClientThread extends Thread {
+    static final String PATHDH = "/home/badnack/Projects/SecureChat/SecureChat/secure-chat/KeyFiles/PrimeDH/Prime";
     private boolean type;
     private User usr;
     static boolean  connect;
@@ -142,15 +143,14 @@ public class ClientThread extends Thread {
                 }
                 
             }
-            DiffieHellman df = new DiffieHellman ();
-            //	    SecretKey key = df.genKeystream("/home/davide/SecureChat/KeyFiles/PrimeDH/Prime",StreamOut,ois);
-            SecretKey key = df.genKeystream("/home/badnack/Projects/SecureChat/SecureChat/secure-chat/KeyFiles/PrimeDH/Prime",StreamOut,ois);
+            SecretKey key = usr.createDiffieHellman(PATHDH,StreamOut,ois);                       
             usr.desInstance(key);
 
             //gestire meglio, se un utente esce deve farlo anche l'altro.
             if(!usr.isRsaPresent(usr.getFriendName()))
               PresentKey = false;
             else PresentKey = true;
+
             /*receive messages*/
             new ReceiveMessage(ois,usr).start();
             
