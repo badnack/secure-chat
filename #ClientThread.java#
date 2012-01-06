@@ -91,7 +91,7 @@ public class ClientThread extends Thread {
                    
                     StreamOut = new ObjectOutputStream( csock.getOutputStream() );
                     ois = new ObjectInputStream( csock.getInputStream() );
-                    Buff = (byte[]) ois.readObject();
+                 
                     
                     FName = getText(Buff);
                     System.out.print("[CHAT] "+ FName + ": "); //accept message

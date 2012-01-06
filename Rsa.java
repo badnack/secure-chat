@@ -24,10 +24,12 @@ public class Rsa {
     static final String PRIVATEPATH = "private.key";
     private String KEYPATH; 	
     private String RegUserName;
+    SecureLogin login; //Used just to make this class secure
 
-    public Rsa(String KeyDirectory){
+    public Rsa(String KeyDirectory,SecureLogin login){
         RegUserName = null;
         KEYPATH =  KeyDirectory;
+        this.login = login;
     }
 
     public void setKeyDirectory(String KeyDirectory){
@@ -35,9 +37,12 @@ public class Rsa {
     }
     
     /**Set the keys owner
-       this function should be called after a login to protect the key from others*/
-    public void setUserName(String name){
+       this function has called after a login in order to protect the key from others */
+    public boolean setUserName(String name){
+        if ( name.compareTo(login.userBound())!=0 )return false;
+        if (!login.userLogged())return false;
         this.RegUserName = name;
+        return true;
     }
 
     /**This method retrieves the keys path by user name*/
@@ -98,13 +103,13 @@ public class Rsa {
     }
 
 
-    public byte[] Encrypt(byte[] data, PublicKey publicKey) throws IllegalBlockSizeException,
+    public byte[] Encrypt(String data, PublicKey publicKey) throws IllegalBlockSizeException,
                                                                    InvalidKeyException,
                                                                    NoSuchAlgorithmException,
                                                                    BadPaddingException,
                                                                    NoSuchPaddingException {       
-        byte[] plainFile=data;
-        //plainFile=data.getBytes();               
+        byte[] plainFile;
+        plainFile=data.getBytes();               
         // Inizializzo un cifrario che usa come algoritmo RSA, come modalita' ECB e come padding PKCS1
         Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");        
         // Lo inizializzo dicendo modalita' di codifica e chiave pubblica da usare
@@ -114,7 +119,7 @@ public class Rsa {
         return encodeData;
     }
     
-    public byte[] Decrypt(byte[] sorg) throws IOException, 
+    public String Decrypt(byte[] sorg) throws IOException, 
                                               InvalidKeyException,
                                               NoSuchAlgorithmException,
                                               InvalidKeySpecException,
@@ -126,12 +131,11 @@ public class Rsa {
         Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
         c.init(Cipher.DECRYPT_MODE, privateKey);        
         byte[] plainFile = c.doFinal(sorg);        
-        /*// DA BYTE[] A STRING
+        // DA BYTE[] A STRING
         StringBuilder sb = new StringBuilder (plainFile.length);
         for (byte b: plainFile)
             sb.append ((char) b);        
-        return sb.toString();*/
-        return plainFile;
+        return sb.toString();
     }
     
     public void createKeys() throws IOException,NoSuchAlgorithmException {

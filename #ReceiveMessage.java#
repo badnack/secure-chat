@@ -36,6 +36,6 @@ public class ReceiveMessage extends Thread {
         System.out.println(usr.getUserName() + " has disconnected");
         System.exit(0);
     }
-    
+   
 
 }

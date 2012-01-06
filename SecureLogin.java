@@ -10,9 +10,34 @@ import java.util.Enumeration;
 
 public class SecureLogin{
     static final int ITERATION = 1000;
-    //static final String CREDENTIALSPATH = "/home/badnack/Projects/SecureChat/Ssl-Chat/Credentials/";
-    static final String CREDENTIALSPATH = "/home/davide/Ssl-Chat/Credentials/";
+    static final String CREDENTIALSPATH = "/home/badnack/Projects/SecureChat/Ssl-Chat/Credentials/";
     static final String FILENAME = "passwd";
+  
+    boolean login;
+    String NickName;
+    public void SecureLogin(){
+        login = false;
+        NickName = null;
+    }
+  
+    /**Used to bind login to Rsa keys
+       @param User: user name
+     */
+    private void bindName( String User){
+        NickName = User;
+    }
+    
+    /** Gets name of user bound to the class instance
+     @return String: the user name*/
+    public String userBound(){
+        return NickName;
+    }
+
+    /** Check whether the user has logged successfully
+     @return boolean: result of checks*/
+    public boolean userLogged(){
+        return login;
+    }
     
     /**Retrieves a string from a bytes array
        @param arr: array of bytes
@@ -124,6 +149,8 @@ public class SecureLogin{
         fos.write(hash);
         fos.write('\n');
         fos.close();          
+
+        bindName(UserName);
         return true;    
     }
     
@@ -169,7 +196,7 @@ public class SecureLogin{
                     byte[] aph = new byte[lh]; //gets hash
                     fis.read(aph);
                     byte[] chpwd = getHash(password,aps); //compute hash                                       
-                    if((getText(aph)).compareTo( getText(chpwd))==0) return true;
+                    if((getText(aph)).compareTo( getText(chpwd))==0) { login=true; bindName(UserName); return true; }
                     else return false;                                        
                 }
                 

@@ -1,13 +1,6 @@
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-
 /**
    This classe allows to manage users' account
+   After that an user has logged in.
 */
 
 class User{
@@ -17,16 +10,26 @@ class User{
     private String clientIp;
     private int serverPort;
     private int clientPort;
+    private SecureLogin login;
     private Rsa rsa;
-    private Des des;
-
-    public User(String name, int port,String server,String KeyDir){
-        this.UserName = name;
+    private boolean valid;
+    
+    /*This class must be called after the login using SecureLogin class.
+     Indeed the main constructor uses a SecureLogin object to identify an user.
+    */
+    public User(int port,String server,SecureLogin log){
+        valid = false;
+        this.login = log;
+        this.UserName = log.userBound();
         this.serverPort = port;
         this.serverIp = server;
-        rsa = new Rsa(KeyDir);  
+        if(this.UserName!=null) valid = true;  
     }
-
+   
+    public boolean isValid(){
+        return valid;
+    }
+    
     public void setClientPort(int port){
         clientPort = port;
     }
@@ -72,53 +75,28 @@ class User{
     
 
     /**RSA methods*/
-    public void CreateRsa() throws Exception{
-        rsa.setUserName(UserName);
+    public boolean  CreateRsa(String KeyDir) throws Exception{
+        rsa = new Rsa(KeyDir,login);  
+        if(!rsa.setUserName(UserName))return false;
         rsa.createKeys();
+        return true;
     }
     
     public boolean isRsaPresent(String UserName){
         return  rsa.isPresent(UserName);
     }
-    public byte[] Decrypt(byte[] data) throws Exception{
+
+    public boolean SignMessage(){
+        return true;
+    }
+    
+    public boolean CheckSign(){ return true;}
+
+    public String Decrypt(byte[] data) throws Exception{
         return rsa.Decrypt(data);
     }
 
-    public byte[] Encrypt(byte[] data) throws Exception{        
+    public byte[] Encrypt(String data) throws Exception{        
         return rsa.Encrypt(data,rsa.GetPublicKey(FriendName));
     }
-    
-    /**DES Create method 
-     * @throws NoSuchAlgorithmException
-     * se accetta il valore nulla per la chiave si può eliminare il booleano */
-    public void CreateDes(boolean exist, SecretKey key) throws NoSuchAlgorithmException{
-    	if(exist) des = new Des(key); //create session key for the client
-    	else des = new Des(); //create session key for the server
-    }
-    
-    /**DES Decrypt method
-     * @throws BadPaddingException 
-     * @throws IllegalBlockSizeException 
-     * @throws NoSuchPaddingException 
-     * @throws NoSuchAlgorithmException 
-     * @throws InvalidKeyException */
-    public String DesDecrypt(byte[] EcnryptData) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException{
-    	return des.DesDecrypt(EcnryptData);
-    }
-    
-    /**DES Encrypt method
-     * @throws BadPaddingException 
-     * @throws IllegalBlockSizeException 
-     * @throws NoSuchPaddingException 
-     * @throws NoSuchAlgorithmException 
-     * @throws InvalidKeyException */
-    public byte[] DesEncrypt(String ClearData) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException{
-    	return des.DesEncrypt(ClearData);
-    }
-    
-    /**Return DES session key method*/
-    public SecretKey getDesKey(){
-    	return des.getSessionKey();
-    }
-    
 }

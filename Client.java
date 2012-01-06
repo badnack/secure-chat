@@ -8,8 +8,7 @@ import javax.net.ssl.SSLSocket;
 
 public class Client {
     static final String LOCALHOST = "127.0.0.1";
-    //static final String KEYDIRECTORY = "/home/badnack/Projects/SecureChat/Ssl-Chat/KeyFiles/";
-    static final String KEYDIRECTORY = "/home/davide/Ssl-Chat/KeyFiles/";
+    static final String KEYDIRECTORY = "/home/badnack/Projects/SecureChat/Ssl-Chat/KeyFiles/";
     static final int PORTC = 1234;
 
     public static void MakeDir(String name){
@@ -57,17 +56,16 @@ public class Client {
                     System.exit(0);
                 }
 
-            }
-                        
+            }                       
             
             /*Checks whether the user directory exists*/
             MakeDir(cred[0]);
             /*Loads user credential*/
-            user = new User(cred[0],port,LOCALHOST,KEYDIRECTORY);
-            
+            user = new User(port,LOCALHOST,login);
+            if(!user.isValid()) System.exit(0);
             /*Sets rsa parameters.
-            Checks whether file keys already exists, in other case has created*/
-            user.CreateRsa();
+            Checks whether file keys already exists, in other case has created */
+            if(!user.CreateRsa(KEYDIRECTORY))System.exit(0);
             
             /*Shows chat board, showing the port given*/
             menu.ChatBoard("Listening port: " + Integer.toString(port));
@@ -81,7 +79,7 @@ public class Client {
                 str =  stdIn.readLine();
                 
                 /*i try these two ways because the thread server could receive
-                  a connect request, in this case a message has shown.*/				
+                  a connect request, in this case a message has shown.*/
                 if(str.compareTo("y") == 0){
                     if (!ct.IsConnected())continue;
                     ct.setAccepted(true);
@@ -116,13 +114,13 @@ public class Client {
                 cc.start();
                 break;
                 
-            }
+                }
             
         }
         
         catch(Exception e){
             System.out.println("[CHAT] Unhandled error!");
-        }				
+        }
         
         
     } 
