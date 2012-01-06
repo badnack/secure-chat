@@ -107,7 +107,7 @@ public class Rsa {
     }
 
 
-    /*public byte[] Encrypt(String data, PublicKey publicKey) throws IllegalBlockSizeException,
+    public byte[] Encrypt(String data, PublicKey publicKey) throws IllegalBlockSizeException,
                                                                    InvalidKeyException,
                                                                    NoSuchAlgorithmException,
                                                                    BadPaddingException,
@@ -121,9 +121,9 @@ public class Rsa {
         // codifico e metto il risultato in encodeFile
         byte[] encodeData = c.doFinal(plainFile);
         return encodeData;
-    }*/
+    }
     
-    /*public String Decrypt(byte[] sorg) throws IOException, 
+    public String Decrypt(byte[] sorg) throws IOException, 
                                               InvalidKeyException,
                                               NoSuchAlgorithmException,
                                               InvalidKeySpecException,
@@ -140,7 +140,7 @@ public class Rsa {
         for (byte b: plainFile)
             sb.append ((char) b);        
         return sb.toString();
-    }*/
+    }
     
     public void createKeys() throws IOException,NoSuchAlgorithmException {
         String UserName = RegUserName;

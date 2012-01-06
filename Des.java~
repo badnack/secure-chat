@@ -15,19 +15,18 @@ public class Des {
 	private SecretKey SessionKey;
 	//private String IV ;
 	
-	/**Constructor*/
+	/**method for the client*/
 	public Des (SecretKey key) {
 		this.SessionKey = key;
 	}
 	
-
-	/**method for the server
+	/**method for the server*/
 	public Des () throws NoSuchAlgorithmException{
 		KeyGenerator DESedeKeyGen = KeyGenerator.getInstance("DESede");
 	    SecretKey DESedeKey = DESedeKeyGen.generateKey();
 		this.SessionKey = DESedeKey;
 	    }
-	*/
+	
 	
 	
 	public SecretKey getSessionKey () {

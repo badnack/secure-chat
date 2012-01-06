@@ -3,8 +3,6 @@
    After that an user has logged in.
 */
 
-import javax.crypto.SecretKey;
-
 class User{
     private String UserName;
     private String FriendName;

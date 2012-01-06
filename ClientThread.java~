@@ -4,7 +4,6 @@ import java.lang.*;
 import java.util.concurrent.locks.*;
 import java.net.*;
 import java.security.*;
-import javax.crypto.SecretKey;
 
 public class ClientThread extends Thread {
     private boolean type;

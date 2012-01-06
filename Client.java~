@@ -8,8 +8,7 @@ import javax.net.ssl.SSLSocket;
 
 public class Client {
     static final String LOCALHOST = "127.0.0.1";
-    //static final String KEYDIRECTORY = "/home/badnack/Projects/SecureChat/Ssl-Chat/KeyFiles/";
-    static final String KEYDIRECTORY = "/home/davide/SecureChat/KeyFiles";
+    static final String KEYDIRECTORY = "/home/badnack/Projects/SecureChat/Ssl-Chat/KeyFiles/";
     static final int PORTC = 1234;
 
     public static void MakeDir(String name){
