@@ -23,7 +23,11 @@ import java.security.SignatureException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays; 
 
+
+
+//modo migliore per la gestione da int a byte[]!!!
 class DiffieHellman{
     static final int LENGTH_RANDOM_EXPONENT = 200;
     static final String SIGSEPARATOR = "DIGSIG";
@@ -54,7 +58,7 @@ class DiffieHellman{
         String s = new String( arr, "UTF-8" );
         return s;
     }
-
+    
     public void readBaseKey(String PathBase) throws IOException{
         BufferedReader fis = new BufferedReader(new FileReader(PathBase));
         p = new BigInteger(fis.readLine()); //almeno 300 cifre
@@ -62,82 +66,94 @@ class DiffieHellman{
         fis.close();
     }
 
-    private byte[] intToByteArray(int value) {
-        return new byte[] {
-                (byte)(value >>> 24),
-                (byte)(value >>> 16),
-                (byte)(value >>> 8),
-                (byte)value};
-    }
-
-
-    private int byteArrayToInt(byte [] b) {
-        return (b[0] << 24)
-            + ((b[1] & 0xFF) << 16)
-            + ((b[2] & 0xFF) << 8)
-            + (b[3] & 0xFF);
-    }
-
-  
     private byte[] concatBytes(byte[] A, byte[] B) {
-        byte[] C= new byte[A.length+B.length];
+        byte[] C= new byte[A.length + B.length];
         System.arraycopy(A, 0, C, 0, A.length);
         System.arraycopy(B, 0, C, A.length, B.length);
-        
         return C;
-    }
+        }
     
+    private int findDelimiterBytes(byte [] b, int off,String sep){
+        int len = sep.length();
+        int k=0;
+        int ap=0;
+        for(int i = off ; i < b.length ; i++){
+            if((char)b[i]== sep.charAt(0) ){
+                ap=len;
+                k=0;
+                for(int j=i; j<ap+i ;j++){                                        
+                    if((char)b[j]!=sep.charAt(k)){len=ap; break;}
+                    len--; k++;
+                }
+                if(len == 0) return i;
+            }
+        }
+        return -1;
+    }
 
-    private boolean CheckFreshness(ObjectOutputStream StreamOut,ObjectInputStream StreamIn,String FName)throws IOException,
-                                                                                                               ClassNotFoundException,
-                                                                                                               InvalidKeyException, 
-                                                                                                               SignatureException,
-                                                                                                               UnsupportedEncodingException,
-                                                                                                               InvalidKeySpecException,
-                                                                                                               NoSuchAlgorithmException {
+    private byte[] CheckFreshness(ObjectOutputStream StreamOut,ObjectInputStream StreamIn,PublicKey publicKey,String FName)throws IOException,
+                                                                                                                                   ClassNotFoundException,
+                                                                                                                                   InvalidKeyException, 
+                                                                                                                                   SignatureException,
+                                                                                                                                   UnsupportedEncodingException,
+                                                                                                                                   InvalidKeySpecException,
+                                                                                                                                   NoSuchAlgorithmException {
         Random rnd = new Random();
         int na = rnd.nextInt(1000);
        
        //signs the nonces
-        byte [] signed = rsa.SignMessage(Integer.toString(na));
-        
-        
-        StreamOut.writeObject(Integer.toString(na).getBytes());         
-        StreamOut.writeObject(signed);         
-        
-        byte[] nonce = (byte[]) StreamIn.readObject();
-         signed = (byte[]) StreamIn.readObject();
-        
-         System.out.println(signed);
-        if(!rsa.CheckSign(nonce,signed,FName))
-            return false;
-        
+        byte [] signed = rsa.SignMessage((Integer.toString(na)).getBytes());
 
-        int nb = Integer.parseInt(getText(nonce));
-       
+        String p1 = Integer.toString(na) + SIGSEPARATOR;
+        byte[] toSend = concatBytes(p1.getBytes(),signed);
+        StreamOut.writeObject(toSend);
+
+        byte[] nonce = (byte[]) StreamIn.readObject();
+        
+        int del = findDelimiterBytes(nonce,0,SIGSEPARATOR);
+        byte[] num = Arrays.copyOfRange(nonce, 0, del);
+        byte[] sig = Arrays.copyOfRange(nonce,del+SIGSEPARATOR.length(),nonce.length);
+        if(!rsa.CheckSign(num,sig,FName))
+            return null;
+           
+        
+        int nb = Integer.parseInt(getText(num));
         nb-=1;
         
-
-        //signs the nonces
-        signed = rsa.SignMessage(Integer.toString(nb));
+        //signs the new nonces and the the part of secret
+        p1 = Integer.toString(nb) + SIGSEPARATOR;
+        byte[] tosign = concatBytes(p1.getBytes(),publicKey.getEncoded());
+        signed = rsa.SignMessage(tosign);
         
         //Sends number
-        StreamOut.writeObject(Integer.toString(nb).getBytes());         
-        StreamOut.writeObject(signed);         
-        System.out.println(signed);
-        nonce = (byte[]) StreamIn.readObject();
-        signed = (byte[]) StreamIn.readObject();
+        p1 = Integer.toString(nb) + SIGSEPARATOR;
+        byte[] tocn1 = concatBytes(p1.getBytes(),publicKey.getEncoded());
+        byte[] tocn2 = concatBytes(tocn1,SIGSEPARATOR.getBytes());
+        byte[] toSend2 = concatBytes(tocn2,signed);
+        StreamOut.writeObject(toSend2);
 
-        if(!rsa.CheckSign(nonce,signed,FName))
-            return false;
 
-      
-        if( Integer.parseInt(getText(nonce)) != (na-1)){
-            //trust exception
-            return false;
-            }
-        return true;
+
+        byte[] nonce2 = (byte[]) StreamIn.readObject();
         
+        del = findDelimiterBytes(nonce2,0,SIGSEPARATOR);
+        del = findDelimiterBytes(nonce2,del+SIGSEPARATOR.length(),SIGSEPARATOR);
+      
+        byte[] Part1 = Arrays.copyOfRange(nonce2, 0, del);
+        byte[] sig2 = Arrays.copyOfRange(nonce2,del+SIGSEPARATOR.length(),nonce2.length);
+        if(!rsa.CheckSign(Part1,sig2,FName))
+            return null;
+      
+        del = findDelimiterBytes(Part1,0,SIGSEPARATOR);
+        byte[] num2 = Arrays.copyOfRange(Part1, 0, del);
+        byte[] key = Arrays.copyOfRange(Part1,del + SIGSEPARATOR.length() ,Part1.length); 
+      
+        if( Integer.parseInt(getText(num2)) != (na-1)){
+            //trust exception
+            return null;
+            }
+        return key;
+            
     }
 
         public SecretKey genKeystream(String PathBase,ObjectOutputStream StreamOut,ObjectInputStream StreamIn,String FName) throws IOException, SignatureException{    
@@ -156,15 +172,9 @@ class DiffieHellman{
             PublicKey publicKey = keypair.getPublic();
 
             //nounces
-            System.out.println(CheckFreshness(StreamOut,StreamIn,FName));
-    
-            
-            // Send the public key bytes to the other party...
-            StreamOut.writeObject(publicKey.getEncoded());
-  
-            // Retrieve the public key bytes of the other party
-            //publicKeyBytes = ...;
-            publicKeyBytes = (byte[])StreamIn.readObject();
+            publicKeyBytes = CheckFreshness(StreamOut,StreamIn,publicKey,FName);
+            if(publicKeyBytes == null) return null;
+              
             
             // Convert the public key bytes into a PublicKey object
             X509EncodedKeySpec x509KeySpec = new X509EncodedKeySpec(publicKeyBytes);

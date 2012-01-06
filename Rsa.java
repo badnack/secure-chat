@@ -175,10 +175,10 @@ public class Rsa {
         fos.close();
     }
 
-    public byte[] SignMessage(String message) throws SignatureException,InvalidKeyException,IOException,NoSuchAlgorithmException,InvalidKeySpecException{
+    public byte[] SignMessage(byte[] message) throws SignatureException,InvalidKeyException,IOException,NoSuchAlgorithmException,InvalidKeySpecException{
         Signature sig = Signature.getInstance("SHA1withRSA");
         sig.initSign(GetPrivateKey());
-        sig.update(message.getBytes());
+        sig.update(message);
         return sig.sign();
     }
 

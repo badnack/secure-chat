@@ -144,6 +144,13 @@ public class ClientThread extends Thread {
                 
             }
             SecretKey key = usr.createDiffieHellman(PATHDH,StreamOut,ois);                       
+           
+            if(key == null)
+                {
+                    System.out.println("[Error] Unable to complete Diffie-Hellman algorhitm");
+                    System.exit(-1);
+                }
+  
             usr.desInstance(key);
 
             //gestire meglio, se un utente esce deve farlo anche l'altro.
