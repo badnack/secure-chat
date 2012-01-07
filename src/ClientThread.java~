@@ -32,7 +32,6 @@ public class ClientThread extends Thread {
     /**
        Main constructor
        @param usr : User object
-       @param path : path of the keyfiles and the credentials
        @param type: kind of class istance (server/client)
        @throws IOException
      */

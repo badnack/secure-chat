@@ -92,8 +92,7 @@ public class SecureLogin{
    }
 
     /** Checks if a given user name has already taken;
-        @param UserName : user name
-	@param path : path of credentials
+        @param user : user name
         @return boolean true whether the given name is free, false otherwise
         @throws IOException
         @thorws FileNotFoundException
@@ -133,7 +132,6 @@ public class SecureLogin{
     /** Puts a new user in the users list
      @param UserName : user name
      @param password : password
-     @param path : path of credentials
      @return boolean : true whether everything has gone well, false otherwise
      @throws IOException
      @throws FileNotFoundException
@@ -175,7 +173,6 @@ public class SecureLogin{
     /**Checks if user credentials are valids
      @param UserName : user name
      @param password : password
-     @param path : path of credentials
      @return boolean : true whether the credentials given are correct, false otherwise
      @throws IOException
      @throws FileNotFoundException*/
