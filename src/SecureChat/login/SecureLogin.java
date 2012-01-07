@@ -1,3 +1,11 @@
+/**
+ *  SecureLogin.java
+ *
+ *  @author Nilo Redini
+ *  @author Davide Pellegrino
+ *  This class allows to manage a simple secure login
+*/
+
 package SecureChat.login;
 
 import SecureChat.file.*;
@@ -12,18 +20,23 @@ import java.util.Hashtable;
 import java.util.Enumeration;
 
 public class SecureLogin{
+    /** Amount of encrypt iterations */
     static final int ITERATION = 1000;
+    /** Name of the file which contains the stored passwords */
     static final String FILENAME = "passwd";
-  
-    boolean login;
-    String NickName;
+    /** Login state */
+    private boolean login;
+    /** User Nickname */
+    private String NickName;
+
+    /** Main constructor */
     public void SecureLogin(){
         login = false;
         NickName = null;
     }
   
     /**Used to bind login to Rsa keys
-       @param User: user name
+       @param User : user name
      */
     private void bindName( String User){
         NickName = User;
@@ -42,8 +55,8 @@ public class SecureLogin{
     }
     
     /**Retrieves a string from a bytes array
-       @param arr: array of bytes
-       @return String: Converted byte
+       @param arr : array of bytes
+       @return String : Converted byte
        @throws UnsupportedEncodingException*/
     private String getText (byte[] arr) throws UnsupportedEncodingException
     {
@@ -61,9 +74,9 @@ public class SecureLogin{
     }
 
     /**Computes hash from a string, using SHA1
-     @param password: password whereby has calculated
-     @param salt: salt bytes
-     @return byte[]: Hash code
+     @param password : password whereby has calculated
+     @param salt : salt bytes
+     @return byte[] : Hash code
      @throws NoSuchAlgorithmException
      @throws UnsupportedEncodingException*/
     private byte[] getHash(String password, byte[] salt) throws NoSuchAlgorithmException,UnsupportedEncodingException {
@@ -79,7 +92,7 @@ public class SecureLogin{
    }
 
     /** Checks if a given user name has already taken;
-        @param user: user name
+        @param user : user name
         @return boolean true whether the given name is free, false otherwise
         @throws IOException
         @thorws FileNotFoundException
@@ -117,9 +130,9 @@ public class SecureLogin{
     
     }
     /** Puts a new user in the users list
-     @param UserName: user name
-     @param password: password
-     @return boolean: true whether everything has gone well, false otherwise
+     @param UserName : user name
+     @param password : password
+     @return boolean : true whether everything has gone well, false otherwise
      @throws IOException
      @throws FileNotFoundException
      @throws NoSuchAlgorithmException
@@ -158,9 +171,9 @@ public class SecureLogin{
     
     
     /**Checks if user credentials are valids
-     @param user: user name
-     @param password: password
-     @return boolean: true whether the credentials given are correct, false otherwise
+     @param UserName : user name
+     @param password : password
+     @return boolean : true whether the credentials given are correct, false otherwise
      @throws IOException
      @throws FileNotFoundException*/
     public boolean LoadUser(String UserName, String password)  throws IOException,FileNotFoundException{

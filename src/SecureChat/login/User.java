@@ -1,32 +1,61 @@
 /**
-   This classe allows to manage users' account
-   After that an user has logged in.
+ *  User.java
+ *
+ *  @author Nilo Redini
+ *  @author Davide Pellegrino
+ *
+ *  This classe allows to manage users' account
+ *  After that an user has logged in.
 */
 
 package SecureChat.login;
+
 import SecureChat.crypto.*;
 import javax.crypto.SecretKey;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.security.SignatureException;
+import java.security.NoSuchAlgorithmException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidKeyException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.BadPaddingException;
 
 public class User{
+    /*This class must be called after the login using SecureLogin class.
+      Indeed the main constructor uses a SecureLogin object to identify an user.
+    */
+    
+    /** User Name*/
     private String UserName;
+    /** User whereby the main user has connected*/
     private String FriendName;
+    /** Server Ip */
     private String serverIp;
+    /** Client ip */
     private String clientIp;
+    /** Server port*/
     private int serverPort;
+    /** Client port */
     private int clientPort;
+    /** Used to manage a secure login */
     private SecureLogin login;
+    /** Used to sign data */
     private Rsa rsa;
+    /** Used to exchange encrypted messages*/
     private Des des;
+    /** Used to check istance validity */
     private boolean valid;
+    /** Used to handle DH algorithm*/
     private DiffieHellman dh;
 
-    /*This class must be called after the login using SecureLogin class.
-     Indeed the main constructor uses a SecureLogin object to identify an user.
-    */
+    /**
+       Main constructor
+       @param port : port whereby the user is connecting
+       @param server : Server Ip
+       @param log : A secure login istance
+     */
     public User(int port,String server,SecureLogin log){
         valid = false;
         this.login = log;
@@ -36,45 +65,93 @@ public class User{
         if(this.UserName!=null) valid = true;  
     }
    
+    /**
+       Checks wheter the class istance is valid or not
+       @return boolean: validity
+     */
     public boolean isValid(){
         return valid;
     }
     
+    /**
+       Sets the client port
+       @param port : port
+     */
     public void setClientPort(int port){
         clientPort = port;
     }
 
+    /**
+       Sets the client ip
+       @param ip : ip
+    */    
     public void setClientIp(String ip){
         clientIp = ip;
     }
 
+    /**
+       Sets the name of user whereby the 
+       main user is talking
+       @param name : Friend name
+    */    
     public void setFriendName(String name){
         FriendName = name;
     }
 
+    /**
+       sets the server port
+       @param port : port
+    */
     public void setServerPort(int port){
         this.serverPort = port;
     }
    
+    /**
+       sets the server ip
+       @param server : ip
+    */
     public void setServerIp(String server){
         this.serverIp = server;
     }
 
+    /**
+       Retrieves name of main user
+       @return String: User name
+     */
     public String getUserName(){
         return UserName;
     }
 
+    /**
+       Retrieves name user whereby
+       the main user is talking
+       @return String: User name
+    */
     public String getFriendName(){
         return FriendName;
     }
+
+    
+    /**
+       Gets the client port
+       @return port: port
+    */    
     public int getClientPort(){
         return clientPort;
     }
 
+    /**
+       Gets the client port
+       @return port: port
+    */    
     public String getClientIp(){
         return clientIp;
     }
     
+    /**
+       Gets the server port
+       @return port: port
+    */    
     public int getServerPort(){
         return serverPort;
     }
@@ -84,50 +161,93 @@ public class User{
     } 
     
 
-    /**RSA methods*/
-    public boolean  CreateRsa(String KeyDir) throws Exception{
+    /** RSA methods */
+
+    /**
+       Allows to create a pair Rsa keys
+       @param KeyDir : directory where the keys will be stored
+       @return boolean : True whether everything has gone well
+       @throws IOException
+       @throws NoSuchAlgorithmException       
+     */
+    public boolean  CreateRsa(String KeyDir) throws IOException,NoSuchAlgorithmException{
         rsa = new Rsa(KeyDir,login);  
         if(!rsa.setUserName(UserName))return false;
         rsa.createKeys();
         return true;
     }
 
+    /**
+       Allows to use Diffie-Hellman's protocol
+       @param path : Path of the main variables to use
+       @param StreamOut : A socket data stream (out)
+       @param ois : A socket data stream (in)
+       @return SecretKey : Secret key
+       @throws IOException
+       @throws SignatureException
+     */
     public SecretKey createDiffieHellman(String path,ObjectOutputStream StreamOut,ObjectInputStream ois) throws IOException,SignatureException{
-        dh = new DiffieHellman (rsa);
-        return dh.genKeystream(path,StreamOut,ois,FriendName);
-        
+        dh = new DiffieHellman (rsa);        
+        SecretKey key = dh.genKeystream(path,StreamOut,ois,FriendName);
+        if(dh.isValid())return key;
+        return null;
     }
     
+    /**
+       Checks whether Rsa public key is present or not
+       @param UserName : Key owner
+       @return boolean : True if the key is present
+    */
     public boolean isRsaPresent(String UserName){
         return  rsa.isPresent(UserName);
     }
 
-    public boolean SignMessage(){
-        return true;
-    }
     
-    public boolean CheckSign(){ return true;}
-
-
     /**DES methods */
+    /**
+       Allows to create a des istance
+       @param key : Secret shared key
+       @return boolean : True if everything has gone well
+     */
     public boolean desInstance (SecretKey key){
         des = new Des(key);
         return true;
     }    
 
-    public String Decrypt(byte[] data) throws Exception{
+    /**
+       Allows to decrypt a message according des algorithm
+       @param data : Data  to decrypt
+       @return String : Data decrypted
+       @throws NoSuchAlgorithmException
+       @throws NoSuchPaddingException,
+       @throws InvalidKeyException,
+       @throws IllegalBlockSizeException,
+       @throws BadPaddingException
+     */
+    public String Decrypt(byte[] data) throws NoSuchAlgorithmException,
+                                              NoSuchPaddingException,
+                                              InvalidKeyException,
+                                              IllegalBlockSizeException,
+                                              BadPaddingException{
         return des.DesDecrypt(data);
     }
-    
-    public byte[] Encrypt(String data) throws Exception{        
+
+    /**
+       Allows to encrypt a message according des algorithm
+       @param data : Data to encrypt
+       @return byte[] : Data encypted
+       @throws NoSuchAlgorithmException
+       @throws NoSuchPaddingException,
+       @throws InvalidKeyException,
+       @throws IllegalBlockSizeException,
+       @throws BadPaddingException
+     */    
+    public byte[] Encrypt(String data) throws NoSuchAlgorithmException,
+                                              NoSuchPaddingException,
+                                              InvalidKeyException,
+                                              IllegalBlockSizeException,
+                                              BadPaddingException{        
         return des.DesEncrypt(data);
     }
 	
-    /*public String Decrypt(byte[] data) throws Exception{
-        return rsa.Decrypt(data);
-    }
-
-    public byte[] Encrypt(String data) throws Exception{        
-        return rsa.Encrypt(data,rsa.GetPublicKey(FriendName));
-    }*/
 }

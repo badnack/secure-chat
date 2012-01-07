@@ -67,6 +67,7 @@ public class Client {
                     cred = menu.RegisteredMenu();
                     if(!login.LoadUser(cred[0],cred[1])){
                         System.out.println("Error: User or Password are invalid.");
+                        Thread.sleep(1000);                                            
                         continue;
                     }
                     break;
@@ -90,7 +91,8 @@ public class Client {
             
             /*Message board shared by two threads */
             while(true){
-                System.out.print("[CHAT] Port to connect: ");
+		
+                System.out.print("[CHAT] Select IP_Address:Port to connect : ");
                 str =  stdIn.readLine();
                 
                 /*i try these two ways because the thread server could receive
@@ -109,9 +111,11 @@ public class Client {
                     continue;
                 }
                 
-                port = PORTC;
+		port = PORTC;
+		// split the IP address and the port, then copy in cred[0] and cred[1]
+		cred=str.split(":");	
                 try {
-                    port = Integer.parseInt(str);
+                    port = Integer.parseInt(cred[1]);
                 }catch (Exception e) {
                     System.out.println("[Error] Unable to open the port given.");
                     continue;
@@ -120,7 +124,7 @@ public class Client {
                 
                 /*Connection parameters*/
                 user.setClientPort(port);
-                user.setClientIp(Directory.LOCALHOST); // da cambiare con l'ip di destinazione
+                user.setClientIp(cred[0]); // da cambiare con l'ip di destinazione
                 
                 
                 /* If i try to connect i start the client mode, 

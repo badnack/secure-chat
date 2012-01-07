@@ -1,7 +1,12 @@
-/** 
-    This class allows to handle RSA keys.
- */
-
+/**
+ *  Rsa.java
+ *
+ *  @author Nilo Redini
+ *  @author Davide Pellegrino
+ *
+ *  This class allows to handle Rsa keys.
+ * 
+*/
 
 package SecureChat.crypto;
 import SecureChat.login.*;
@@ -26,26 +31,45 @@ import java.security.SignatureException;
 import java.security.InvalidKeyException;
 
 public class Rsa {
+    /** Enum */
     public enum KEY {PRIVATE,PUBLIC};
+    /** Dummy string to request private key */
     static final String REQPRIVATEKEY = "null";
+    /** String used to find public keys */
     static final String PUBLICPATH = "public.key";
+    /** String used to find private keys */
     static final String PRIVATEPATH = "private.key";
+    /** Keys path */
     private String KEYPATH; 	
+    /** Keys owner */
     private String RegUserName;
-    SecureLogin login; //Used just to make this class secure
+    /** Used just to make this class secure: this class must be work with SecureLogin */
+    SecureLogin login;
 
+    /**
+       Main constructor
+       @param login : Used to identify the owner of rsa keys
+       @param KeyDirectory : Directory of the keys
+     */
     public Rsa(String KeyDirectory,SecureLogin login){
         RegUserName = null;
         KEYPATH =  KeyDirectory;
         this.login = login;
     }
 
+    /**
+       Sets the keys directory
+       @param KeyDirectory : Path so set as default
+     */
     public void setKeyDirectory(String KeyDirectory){
             KEYPATH =  KeyDirectory;
     }
     
     /**Set the keys owner
-       this function has called after a login in order to protect the key from others */
+       this function has called after a login in order to protect the key from others on the same computer
+       @param name : Name of the user
+       @return boolean : True whether the user has already logged
+    */
     public boolean setUserName(String name){
         if ( name.compareTo(login.userBound())!=0 )return false;
         if (!login.userLogged())return false;
@@ -53,7 +77,12 @@ public class Rsa {
         return true;
     }
 
-    /**This method retrieves the keys path by user name*/
+    /**
+       This method retrieves the keys path by user name
+       @param UserName : Name of the user
+       @param k : The kind of key to search
+       @return String : Path
+     */
     private String UserToPath(String UserName,KEY k){
         if(k==KEY.PUBLIC)
             return KEYPATH + RegUserName + "/" + UserName +"_" + PUBLICPATH;
@@ -62,16 +91,30 @@ public class Rsa {
         return KEYPATH + RegUserName  + "/" + RegUserName + "_" + PRIVATEPATH;
     }
 
-    /** Checks whether a public key is present */
+    /** 
+        Checks whether a public key is present 
+        @param UserName : User name
+        @return boolean : True if present, false otherwise
+    */
     public boolean isPresent(String UserName){
         try{
             FileInputStream fis = new FileInputStream(UserToPath(UserName,KEY.PUBLIC));
             fis.close();
-        }catch(Exception x){return false; }
+        }
+        catch(Exception x){
+            return false; 
+        }
         return true;
     }
-
-    //Get a public key stored giving the username
+    
+    /**
+       Gets a public key stored giving the username
+       @param UserName : User name
+       @return PublicKey
+       @throws IOException
+       @throws InvalidKeySpecException
+       @throws NoSuchAlgotithmException
+    */
     public PublicKey GetPublicKey(String UserName) throws IOException,InvalidKeySpecException,NoSuchAlgorithmException{
         String path = UserToPath (UserName,KEY.PUBLIC);
         FileInputStream fis = new FileInputStream(path);
@@ -92,6 +135,13 @@ public class Rsa {
 
     }
 
+    /**
+       Gets a private key stored of the owner
+       @return PrivateKey
+       @throws IOException
+       @throws InvalidKeySpecException
+       @throws NoSuchAlgotithmException
+    */
     private PrivateKey GetPrivateKey() throws IOException,InvalidKeySpecException,NoSuchAlgorithmException{
         String path = UserToPath (REQPRIVATEKEY,KEY.PRIVATE);
         
@@ -111,41 +161,12 @@ public class Rsa {
     }
 
 
-    /*public byte[] Encrypt(String data, PublicKey publicKey) throws IllegalBlockSizeException,
-                                                                   InvalidKeyException,
-                                                                   NoSuchAlgorithmException,
-                                                                   BadPaddingException,
-                                                                   NoSuchPaddingException {       
-        byte[] plainFile;
-        plainFile=data.getBytes();               
-        // Inizializzo un cifrario che usa come algoritmo RSA, come modalita' ECB e come padding PKCS1
-        Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");        
-        // Lo inizializzo dicendo modalita' di codifica e chiave pubblica da usare
-        c.init(Cipher.ENCRYPT_MODE, publicKey);
-        // codifico e metto il risultato in encodeFile
-        byte[] encodeData = c.doFinal(plainFile);
-        return encodeData;
-    }*/
-    
-    /*public String Decrypt(byte[] sorg) throws IOException, 
-                                              InvalidKeyException,
-                                              NoSuchAlgorithmException,
-                                              InvalidKeySpecException,
-                                              NoSuchPaddingException,
-                                              IllegalBlockSizeException,
-                                              BadPaddingException{        
-        // DECODIFICA
-        PrivateKey privateKey = GetPrivateKey();
-        Cipher c = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-        c.init(Cipher.DECRYPT_MODE, privateKey);        
-        byte[] plainFile = c.doFinal(sorg);        
-        // DA BYTE[] A STRING
-        StringBuilder sb = new StringBuilder (plainFile.length);
-        for (byte b: plainFile)
-            sb.append ((char) b);        
-        return sb.toString();
-    }*/
-    
+    /**
+       This function allows to create a pair of RSA keys which will be stored
+       in two different file
+       @throws IOException
+       @throws NoSuchAlgorithmException
+     */
     public void createKeys() throws IOException,NoSuchAlgorithmException {
         String UserName = RegUserName;
         boolean Exists = true;
@@ -193,22 +214,6 @@ public class Rsa {
         return sig.verify(sign);
       
     }
-
-
-    /*public static byte[] signData(byte[] data, PrivateKey key) throws Exception {
-    Signature signer = Signature.getInstance("SHA1withDSA");
-    signer.initSign(key);
-    signer.update(data);
-    return (signer.sign());
-  }
-
-  public static boolean verifySig(byte[] data, PublicKey key, byte[] sig) throws Exception {
-    Signature signer = Signature.getInstance("SHA1withDSA");
-    signer.initVerify(key);
-    signer.update(data);
-    return (signer.verify(sig));
-
-  }*/
 }
 
 

@@ -1,3 +1,13 @@
+/**
+ *  Menu.java
+ *  
+ *  @author Nilo Redini
+ *  @auhor Davide Pellegrino
+ *
+ *  This class merely shows a little menu 
+ * 
+*/
+
 package SecureChat.graphics;
 import java.io.*;
 

@@ -1,3 +1,14 @@
+/**
+ *  DiffieHellman.java
+ *
+ *  @author Nilo Redini
+ *  @author Davide Pellegrino
+ *
+ *  This class allows to handle DiffieHellman protocol.
+ * 
+*/
+
+
 package SecureChat.crypto;
 import java.math.BigInteger;
 import java.security.spec.InvalidKeySpecException;
@@ -30,17 +41,27 @@ import java.util.Arrays;
 
 //modo migliore per la gestione da int a byte[]!!!
 public class DiffieHellman{
+    /** Length of random exponent */
     static final int LENGTH_RANDOM_EXPONENT = 200;
+    /** Custom separator in a message signed */
     static final String SIGSEPARATOR = "DIGSIG";
-   
-    String[] values; //prendo p e g da un file
+    /** Numeber whereby do the module operation */
     private BigInteger p; 
+    /** Base number generator */
     private BigInteger g; 
+    /** Strings length */
     private int len;  
+    /** PublicKey in bytes used to send part of DH shared key */
     byte[] publicKeyBytes ;
+    /** Used to check whethet the class istance is valid or not */
     boolean valid;
+    /** Used to sign messages in order to avoid Man in the middle (MID)*/
     Rsa rsa;
 
+    /** 
+        Main constructor
+        @param rsa : An rsa object used to sign data
+     */
     public  DiffieHellman(Rsa rsa){
         len = LENGTH_RANDOM_EXPONENT;
         publicKeyBytes = null;
@@ -50,16 +71,32 @@ public class DiffieHellman{
         this.rsa = rsa;
     }
 
+    /**
+       Allows to check whether an istance of this class is valid or not
+       @return boolean: True if the istance is valid, false otherwise
+     */
     public boolean isValid(){
         return valid;
     }
     
+    /**
+       Allows to convert byte[] to String
+       @param arr : Byte array to convert
+       @return String : Text converted
+       @throws UnsupportedEncodingException
+     */
     private String getText (byte[] arr) throws UnsupportedEncodingException
     {
         String s = new String( arr, "UTF-8" );
         return s;
     }
     
+    
+    /**
+       This function reads the two numbers P and Q used by Diffie-Hellman
+       @param PathBase : Path where the file is stored
+       @throws IOException
+     */
     public void readBaseKey(String PathBase) throws IOException{
         BufferedReader fis = new BufferedReader(new FileReader(PathBase));
         p = new BigInteger(fis.readLine()); //almeno 300 cifre
@@ -67,6 +104,12 @@ public class DiffieHellman{
         fis.close();
     }
 
+    /**
+       Allows to concatenate due byte arrays
+       @param A : First byte array
+       @param B : Second byte array
+       @return byte[]
+     */
     private byte[] concatBytes(byte[] A, byte[] B) {
         byte[] C= new byte[A.length + B.length];
         System.arraycopy(A, 0, C, 0, A.length);
@@ -74,6 +117,13 @@ public class DiffieHellman{
         return C;
         }
     
+    /**
+       Allows to find a string in a byte array
+       @param b : Byte array to search in
+       @param off : offset
+       @param sep : String to search
+       @return int : Initial position of the string 
+     */
     private int findDelimiterBytes(byte [] b, int off,String sep){
         int len = sep.length();
         int k=0;
@@ -92,6 +142,22 @@ public class DiffieHellman{
         return -1;
     }
 
+    /**
+       This function allows to avoid main in the middle attack,
+       signing every message sent and usign a nonce.
+       @param StreamOut : A socket stream (out)
+       @param StreamIn : A socket stream (in)
+       @param publicKey : Part of the shared secret key to send on the other side
+       @param FName : The friend name whereby main user is talking
+       @return byte[] : The final part of the shared key
+       @throws IOException
+       @throws ClassNotFoundException
+       @throws InvalidKeyException
+       @throws SignatureException
+       @throws UnsupportedEncodingException
+       @throws InvalidKeySpecException
+       @throws NoSuchAlgorithmException 
+     */
     private byte[] CheckFreshness(ObjectOutputStream StreamOut,ObjectInputStream StreamIn,PublicKey publicKey,String FName)throws IOException,
                                                                                                                                    ClassNotFoundException,
                                                                                                                                    InvalidKeyException, 
@@ -117,7 +183,6 @@ public class DiffieHellman{
         if(!rsa.CheckSign(num,sig,FName))
             return null;
            
-        
         int nb = Integer.parseInt(getText(num));
         nb-=1;
         
@@ -157,7 +222,18 @@ public class DiffieHellman{
             
     }
 
-        public SecretKey genKeystream(String PathBase,ObjectOutputStream StreamOut,ObjectInputStream StreamIn,String FName) throws IOException, SignatureException{    
+    /**
+       This function allows to generate a secret key using Diffie-Hellman algorithm
+       @param PathBase : Path of file wich contains P and Q numbers to use in Diffie-Hellman
+       @param StreamOut : A socket stream (out)
+       @param StreamIn : A socket stream (in)
+       @param FName : The friend name whereby main user is talking
+       @return SecretKey : A shared secret key to use for the talk session
+       @throws IOException
+       @throws SignatureException              
+     */
+    public SecretKey genKeystream(String PathBase,ObjectOutputStream StreamOut,ObjectInputStream StreamIn,String FName) throws IOException,
+                                                                                                                               SignatureException{    
         
         try {    
             readBaseKey(PathBase);
@@ -196,12 +272,12 @@ public class DiffieHellman{
             return secretKey;
            
         } 
-        catch (java.security.InvalidKeyException e) {
-        } catch (java.security.spec.InvalidKeySpecException e) {
-        } catch (java.security.InvalidAlgorithmParameterException e) {
-        } catch (java.security.NoSuchAlgorithmException e) {
-        } catch(ClassNotFoundException x){
-        } catch (IOException e) {
+        catch (java.security.InvalidKeyException e) {valid = false;}
+        catch (java.security.spec.InvalidKeySpecException e) {valid = false;}
+        catch (java.security.InvalidAlgorithmParameterException e) {valid = false;}
+        catch (java.security.NoSuchAlgorithmException e) {valid = false;}
+        catch(ClassNotFoundException x){valid = false;}
+        catch (IOException e) {
             valid = false;
             throw e;
         }
