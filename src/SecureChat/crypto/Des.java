@@ -23,20 +23,20 @@ public class Des {
     
     /** Private session key*/
     private SecretKey SessionKey;
-	
+    
     /** 
         Main Constructor
         @param key : A secret shared key
-     */
+    */
     public Des (SecretKey key) {
         this.SessionKey = key;
     }
 	
-
+    
     /**
        Get the shared key
        @return SecretKey
-     */
+    */
     public SecretKey getSessionKey () {
         return this.SessionKey;
     }
@@ -72,7 +72,7 @@ public class Des {
         return EncryptData;
     }
     
-
+    
     /**
        Allows to decrypt a message according des algorithm
        @param EncryptData : Data  to decrypt
@@ -82,7 +82,7 @@ public class Des {
        @throws InvalidKeyException,
        @throws IllegalBlockSizeException,
        @throws BadPaddingException
-     */
+    */
     public String DesDecrypt (byte[] EncryptData) throws NoSuchAlgorithmException, 
                                                          NoSuchPaddingException, 
                                                          InvalidKeyException, 
