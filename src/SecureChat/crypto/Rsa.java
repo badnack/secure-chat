@@ -2,6 +2,10 @@
     This class allows to handle RSA keys.
  */
 
+
+package SecureChat.crypto;
+import SecureChat.login.*;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -61,7 +65,7 @@ public class Rsa {
     /** Checks whether a public key is present */
     public boolean isPresent(String UserName){
         try{
-            FileInputStream fis = new FileInputStream(KEYPATH + RegUserName + UserName + "_" + PUBLICPATH);
+            FileInputStream fis = new FileInputStream(UserToPath(UserName,KEY.PUBLIC));
             fis.close();
         }catch(Exception x){return false; }
         return true;
@@ -107,7 +111,7 @@ public class Rsa {
     }
 
 
-    public byte[] Encrypt(String data, PublicKey publicKey) throws IllegalBlockSizeException,
+    /*public byte[] Encrypt(String data, PublicKey publicKey) throws IllegalBlockSizeException,
                                                                    InvalidKeyException,
                                                                    NoSuchAlgorithmException,
                                                                    BadPaddingException,
@@ -121,9 +125,9 @@ public class Rsa {
         // codifico e metto il risultato in encodeFile
         byte[] encodeData = c.doFinal(plainFile);
         return encodeData;
-    }
+    }*/
     
-    public String Decrypt(byte[] sorg) throws IOException, 
+    /*public String Decrypt(byte[] sorg) throws IOException, 
                                               InvalidKeyException,
                                               NoSuchAlgorithmException,
                                               InvalidKeySpecException,
@@ -140,7 +144,7 @@ public class Rsa {
         for (byte b: plainFile)
             sb.append ((char) b);        
         return sb.toString();
-    }
+    }*/
     
     public void createKeys() throws IOException,NoSuchAlgorithmException {
         String UserName = RegUserName;
@@ -175,18 +179,36 @@ public class Rsa {
         fos.close();
     }
 
-    public byte[] SignMessage(String message) throws SignatureException,InvalidKeyException,IOException,NoSuchAlgorithmException,InvalidKeySpecException{
+    public byte[] SignMessage(byte[] message) throws SignatureException,InvalidKeyException,IOException,NoSuchAlgorithmException,InvalidKeySpecException{
         Signature sig = Signature.getInstance("SHA1withRSA");
         sig.initSign(GetPrivateKey());
-        sig.update(message.getBytes());
-        byte[] sigBytes = sig.sign();
-        return sigBytes;
+        sig.update(message);
+        return sig.sign();
     }
 
-    //da fare
-    public boolean CheckSign(String message) throws SignatureException,InvalidKeyException,IOException,NoSuchAlgorithmException,InvalidKeySpecException{
-        return true;
+    public boolean CheckSign(byte[] message,byte[] sign, String UserName) throws SignatureException,InvalidKeyException,IOException,NoSuchAlgorithmException,InvalidKeySpecException{
+        Signature sig = Signature.getInstance("SHA1withRSA");
+        sig.initVerify(GetPublicKey(UserName));
+        sig.update(message);
+        return sig.verify(sign);
+      
     }
+
+
+    /*public static byte[] signData(byte[] data, PrivateKey key) throws Exception {
+    Signature signer = Signature.getInstance("SHA1withDSA");
+    signer.initSign(key);
+    signer.update(data);
+    return (signer.sign());
+  }
+
+  public static boolean verifySig(byte[] data, PublicKey key, byte[] sig) throws Exception {
+    Signature signer = Signature.getInstance("SHA1withDSA");
+    signer.initVerify(key);
+    signer.update(data);
+    return (signer.verify(sig));
+
+  }*/
 }
 
 

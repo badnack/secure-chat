@@ -1,3 +1,4 @@
+
 import java.io.*;
 import java.net.*;
 import java.lang.*;
@@ -5,15 +6,16 @@ import java.util.concurrent.locks.*;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
+import SecureChat.login.*;
+import SecureChat.graphics.*;
+import SecureChat.file.*;
 
 public class Client {
-    static final String LOCALHOST = "127.0.0.1";
-    static final String KEYDIRECTORY = "/home/badnack/Projects/SecureChat/Ssl-Chat/KeyFiles/";
     static final int PORTC = 1234;
-
+    
     public static void MakeDir(String name){
         try{
-            Directory.MakeDirectory(KEYDIRECTORY + name);
+            Directory.MakeDirectory(Directory.KEYDIRECTORY + name);
         }catch(IOException x ){System.exit(-1);}
 
     }
@@ -61,11 +63,11 @@ public class Client {
             /*Checks whether the user directory exists*/
             MakeDir(cred[0]);
             /*Loads user credential*/
-            user = new User(port,LOCALHOST,login);
+            user = new User(port,Directory.LOCALHOST,login);
             if(!user.isValid()) System.exit(0);
             /*Sets rsa parameters.
             Checks whether file keys already exists, in other case has created */
-            if(!user.CreateRsa(KEYDIRECTORY))System.exit(0);
+            if(!user.CreateRsa(Directory.KEYDIRECTORY))System.exit(0);
             
             /*Shows chat board, showing the port given*/
             menu.ChatBoard("Listening port: " + Integer.toString(port));
@@ -105,7 +107,7 @@ public class Client {
                 
                 /*Connection parameters*/
                 user.setClientPort(port);
-                user.setClientIp(LOCALHOST); // da cambiare con l'ip di destinazione
+                user.setClientIp(Directory.LOCALHOST); // da cambiare con l'ip di destinazione
                 
                 
                 /* If i try to connect i start the client mode, 

@@ -1,9 +1,13 @@
+
+import SecureChat.file.*;
+import SecureChat.login.*;
 import java.io.*;
 import java.util.*;
 import java.lang.*;
 import java.util.concurrent.locks.*;
 import java.net.*;
 import java.security.*;
+import javax.crypto.SecretKey;
 
 public class ClientThread extends Thread {
     private boolean type;
@@ -141,14 +145,20 @@ public class ClientThread extends Thread {
                 }
                 
             }
-            DiffieHellman df = new DiffieHellman ();
-	    SecretKey key = df.genKeystream("/home/davide/SecureChat/KeyFiles/PrimeDH/Prime",StreamOut,ois);
-	    //SecretKey key = df.genKeystream("/home/badnack/Projects/SecureChat/Ssl-Chat/KeyFiles/PrimeDH/Prime",StreamOut,ois);
-	    usr.desInstance(key);
+            SecretKey key = usr.createDiffieHellman(Directory.PATHDH,StreamOut,ois);                       
+           
+            if(key == null)
+                {
+                    System.out.println("[Error] Unable to complete Diffie-Hellman algorhitm");
+                    System.exit(-1);
+                }
+  
+            usr.desInstance(key);
 
             //gestire meglio, se un utente esce deve farlo anche l'altro.
             if(!usr.isRsaPresent(usr.getFriendName()))
-                PresentKey = false;
+              PresentKey = false;
+            else PresentKey = true;
 
             /*receive messages*/
             new ReceiveMessage(ois,usr).start();

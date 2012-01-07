@@ -1,3 +1,6 @@
+package SecureChat.login;
+
+import SecureChat.file.*;
 import java.security.SecureRandom;
 import java.util.Random;
 import java.io.*;
@@ -10,7 +13,6 @@ import java.util.Enumeration;
 
 public class SecureLogin{
     static final int ITERATION = 1000;
-    static final String CREDENTIALSPATH = "/home/badnack/Projects/SecureChat/Ssl-Chat/Credentials/";
     static final String FILENAME = "passwd";
   
     boolean login;
@@ -84,13 +86,13 @@ public class SecureLogin{
     */
     private boolean CheckUserName(String UserName) throws IOException,FileNotFoundException{
         int ln,ls,lh;
-        Directory.MakeDirectory(CREDENTIALSPATH);
+        Directory.MakeDirectory(Directory.CREDENTIALSPATH);
         try{
-            FileInputStream fis = new FileInputStream(new File(CREDENTIALSPATH + FILENAME));
+            FileInputStream fis = new FileInputStream(new File(Directory.CREDENTIALSPATH + FILENAME));
             fis.close();
         }catch(FileNotFoundException x){return true;}
         
-        FileInputStream fis = new FileInputStream(new File(CREDENTIALSPATH + FILENAME));
+        FileInputStream fis = new FileInputStream(new File(Directory.CREDENTIALSPATH + FILENAME));
         
         try{
             while(true){                 
@@ -127,7 +129,7 @@ public class SecureLogin{
         if(!CheckUserName(UserName))return false;        
         byte[] salt = getSalt();       
         byte[] hash = getHash(password,salt);
-        FileOutputStream fos = new FileOutputStream(CREDENTIALSPATH + FILENAME,true);                    
+        FileOutputStream fos = new FileOutputStream(Directory.CREDENTIALSPATH + FILENAME,true);                    
 
         //save file
          int ls,lh,ln;
@@ -163,13 +165,13 @@ public class SecureLogin{
      @throws FileNotFoundException*/
     public boolean LoadUser(String UserName, String password)  throws IOException,FileNotFoundException{
         int ln,ls,lh;
-        Directory.MakeDirectory(CREDENTIALSPATH);
+        Directory.MakeDirectory(Directory.CREDENTIALSPATH);
         try{
-            FileInputStream fis = new FileInputStream(new File(CREDENTIALSPATH + FILENAME));
+            FileInputStream fis = new FileInputStream(new File(Directory.CREDENTIALSPATH + FILENAME));
             fis.close();
         }catch(FileNotFoundException x){return false;}
         
-        FileInputStream fis = new FileInputStream(new File(CREDENTIALSPATH + FILENAME));
+        FileInputStream fis = new FileInputStream(new File(Directory.CREDENTIALSPATH + FILENAME));
         
         try{
              while(true){                 

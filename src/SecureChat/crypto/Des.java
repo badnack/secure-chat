@@ -1,3 +1,4 @@
+package SecureChat.crypto;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
@@ -15,18 +16,19 @@ public class Des {
 	private SecretKey SessionKey;
 	//private String IV ;
 	
-	/**method for the client*/
+	/**Constructor*/
 	public Des (SecretKey key) {
 		this.SessionKey = key;
 	}
 	
-	/**method for the server*/
+
+	/**method for the server
 	public Des () throws NoSuchAlgorithmException{
 		KeyGenerator DESedeKeyGen = KeyGenerator.getInstance("DESede");
 	    SecretKey DESedeKey = DESedeKeyGen.generateKey();
 		this.SessionKey = DESedeKey;
 	    }
-	
+	*/
 	
 	
 	public SecretKey getSessionKey () {
