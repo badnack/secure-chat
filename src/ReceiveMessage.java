@@ -1,5 +1,12 @@
+/**
+   ReceiveMessage.java
+   @author Nilo Redini
+   @author Davide Pellegrino
+   
+   this class allows to receive messages from a secure connection
+*/
+
 import SecureChat.login.*;
-import SecureChat.crypto.Rsa;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -7,16 +14,27 @@ import java.lang.*;
 import java.security.*;
 
 public class ReceiveMessage extends Thread {
+    /** Socket input stream */
     private  ObjectInputStream input;
-    private PrivateKey PvKey;
+    /** User ID*/
     private User usr;
-    private Rsa rsa;
     
+    /**
+       Main constructor
+       @param input: input stream
+       @param user: an User object
+     */
     public ReceiveMessage (ObjectInputStream input,User usr){
         this.usr = usr;
         this.input = input;
     }
-
+    
+    /**
+       Converts byte array in String
+       @param arr: byte array to convert
+       @return String: String converted
+       @throws UnsupportedEncodingException
+    */
     public String getText (byte[] arr) throws UnsupportedEncodingException
     {
         String s = new String( arr, "UTF-8" );

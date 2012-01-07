@@ -1,4 +1,13 @@
-
+/**
+   Client.java
+   @author Nilo Redini
+   @author Davide Pellegrino
+   
+   This class contain the main function and implements
+   the main part of a chat.
+   Here user can register or load his credentials, moreover he can connecting
+   to another user or viceversa.
+*/
 import java.io.*;
 import java.net.*;
 import java.lang.*;
@@ -16,7 +25,10 @@ public class Client {
     public static void MakeDir(String name){
         try{
             Directory.MakeDirectory(Directory.KEYDIRECTORY + name);
-        }catch(IOException x ){System.exit(-1);}
+        }catch(IOException x ){
+            System.out.println(x.getMessage());
+            System.exit(-1);
+        }
 
     }
 
@@ -32,34 +44,35 @@ public class Client {
         BufferedReader stdIn = new BufferedReader ( new InputStreamReader (System.in));
         try{
             port = Integer.parseInt(args[0]);
-            ch = menu.InitialMenu();
-            /* Registration */
-            if(ch == 0) {
-                while(true){
+            while(true){
+                ch = menu.InitialMenu();
+                /* Registration */
+                if(ch == 0) {
                     cred = menu.NewUserMenu();
                     if(cred[1].length()<2){
                         System.out.println("Warning: Password is too short.");
-                        //mettere una sleep
+                        Thread.sleep(1000);
                         continue;
                     }
                     if(!login.newUser(cred[0],cred[1])){
                         System.out.println("Warning: User name already in use.");
-                        //mettere una sleep
+                        Thread.sleep(1000);
+                        continue;
                     }
-                    else break;
-                }                              
-            }
-
-            /* Login */
-            if(ch == 1) {
-                cred = menu.RegisteredMenu();
-                if(!login.LoadUser(cred[0],cred[1])){
-                    System.out.println("Error: User or Password are invalid.");
-                    System.exit(0);
+                    
                 }
-
-            }                       
-            
+                
+                /* Login */
+                if(ch == 1) {
+                    cred = menu.RegisteredMenu();
+                    if(!login.LoadUser(cred[0],cred[1])){
+                        System.out.println("Error: User or Password are invalid.");
+                        continue;
+                    }
+                    break;
+                    
+                }                       
+            }
             /*Checks whether the user directory exists*/
             MakeDir(cred[0]);
             /*Loads user credential*/

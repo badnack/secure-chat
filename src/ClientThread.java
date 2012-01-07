@@ -1,3 +1,12 @@
+/**
+   ClientThread.java
+   @author Nilo Redini
+   @author Davide Pellegrino
+
+   This class manages server and client threads both.
+   User can choose to connecting or to wait connection; this class
+   implements this chose.
+*/
 
 import SecureChat.file.*;
 import SecureChat.login.*;
@@ -10,6 +19,7 @@ import java.security.*;
 import javax.crypto.SecretKey;
 
 public class ClientThread extends Thread {
+    
     private boolean type;
     private User usr;
     static boolean  connect;
@@ -18,6 +28,12 @@ public class ClientThread extends Thread {
     static Condition WaitCall; 	
     private boolean PresentKey;
 
+    /**
+       Main constructor
+       @param usr : User object
+       @param type: kind of class istance (server/client)
+       @throws IOException
+     */
     public ClientThread (User usr, boolean type)throws IOException{
         this.sem = new ReentrantLock();
         this.type = type;
@@ -27,6 +43,10 @@ public class ClientThread extends Thread {
         PresentKey = true;
     }
     
+    /**
+       Retrieves the connection state
+       @return boolean: connection state
+     */
     public boolean IsConnected(){
         boolean test;
         sem.lock();
@@ -35,6 +55,9 @@ public class ClientThread extends Thread {
         return test;
     }
 
+    /**
+       Wakes up a thread which is waiting a connection
+     */
     public void signalConnected(){
         sem.lock();
         try{
@@ -45,29 +68,54 @@ public class ClientThread extends Thread {
         }	
     }
     
+    /**
+       Exit function, used to quit this thread by main thread
+     */
     public void exitThread(){
         System.exit(0);	
     }
     
+    /**
+       Reset connection parameter
+     */
     private void resetConnect(){
         sem.lock();
         connect = false;							
         sem.unlock();
     }
     
+    /**
+       Set connection parameter
+     */
     private void setConnect(){
         sem.lock();
         connect = true;							
         sem.unlock();
     }
     
+    /**
+       Set a parameter according to decision of accept a connect 
+       or not.
+       @param value: true if connection is goingo to be accepted, false otherwise
+     */
     public void setAccepted(boolean value){
         accepted = value;
     }
+
+    /**
+       Return state of connection
+       @return boolean: true if connection has been accepted, false otherwise
+     */
     public boolean isAccepted(){
         return accepted;
     }
 
+    /**
+       Converts byte array in String
+       @param arr: byte array to convert
+       @return String: String converted
+       @throws UnsupportedEncodingException
+     */
     public String getText (byte[] arr) throws UnsupportedEncodingException
     {
         String s = new String( arr, "UTF-8" );
@@ -84,13 +132,13 @@ public class ClientThread extends Thread {
         BufferedReader stdIn = new BufferedReader ( new InputStreamReader (System.in));
         try{
             
-            //server's body
+            //server body
             if(type){
                 while(true){
                     resetConnect();
                                         
                     ss = new ServerSocket(usr.getServerPort());
-                    csock = ss.accept();// Attesa socket
+                    csock = ss.accept();
                     if(IsConnected())System.exit(0); //whether the user has already connect the process has killed.
                    
                     StreamOut = new ObjectOutputStream( csock.getOutputStream() );
