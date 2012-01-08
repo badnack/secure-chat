@@ -1,8 +1,112 @@
-How to use SslChat:
+Secure Chat (P2P)
+===================================
 
-The password to use SSL certificate is "123456"
+Programming language: Java
+Author(s): Nilo Redini, Davide Pellegrino
+Site(s):
+        * http://redo86.altervista.org (Nilo Redini)
+Class: Computer engeneering from University of Pisa - Accademic year 2011-2012
 
-The command to start SSL chat is:
-	"java -Djavax.net.ssl.keyStore=mySrvKeystore -Djavax.net.ssl.keyStorePassword=123456 Client <port>"
-where the <ports> MUST be different for both clients.
+
+
+
+What this software do ?
+===================================
+This program allows to you to comunicate in a secure way with other users. 
+In order to use this software is necessary retrieve the public key of the 
+user with which you want to talk, and put this in the correct folder (see below for details).
+You can register to the service and login whenever you want, the passwords are stored locally 
+and protected by SHA1 using SALT bytes.
+The session key (used to comunicate among users) is created using Diffie-Hellman algorithm 
+and,in order to avoid man in the middle attack, every phase of the algorithm is signed by 
+private key(provided by user or created in registration phase).
+In the end the entire communication is encrypted with DES algorithm.
+Whether the RSA keys are not present when a new user is registering, these are created and stored
+in the test/KeyFiles folder (see below).
+Otherwise you can use your pair keys simply putting these in the directory above, renaming these
+like this:
+* Private key: UserName_private.key
+* Public key: UserName_public.key
+
+
+For more details pleas read the documentation and the files of the specifications in
+the doc/.
+
+
+
+Compile the entire project
+===================================
+To compile the entire project and the library just type:
+$make
+  
+If all went well you should see three new classes in bin directory:
+Client.class , ClientThread.class and Receive.class
+
+
+
+Chat part
+===================================
+To start chatting, after taking the user's public key with which you want to talk, just make :
+$ java Client [PORT: used to receive connections]
+
+By default port value is 1234.
+
+You can also use defalut configuration typing:
+$ make test1  (To use port 1234)
+$ make test2 (To use port 1345)
+
+
+
+Test part
+===================================
+To test the software please use these two user's credentials:
+
+* User: asd
+  Password: lol
+
+* User: lol
+  Password: asd
+
+
+
+Clean all
+===================================
+To clean all using the makefile:
+$make cleanall
+
+
+
+Documentation
+===================================
+To compile the documentation just type:
+$ make documentation
+
+Doxygen is required.
+http://www.stack.nl/~dimitri/doxygen/
+
+
+
+Folders contents
+===================================
+
+bin/  contains the binary files 
+doc/  contains the documentation files
+src/  contains all sources classes
+test/ contains the files were used for testing operations
+    /Credentials/ contains the password file
+    /KeyFiles/ contains all keys stored locally (for each user is stored his private key and
+                 the public keys which he has retrieved)
+
+
+
+
+
+
+
+Tested on Ubuntu 10.04 with kernel 2.6.32-34 and on Ubuntu 11.04 with kerne 1.6.38-11
+
+License
+===================================
+Released under GNU GPLv3 license (http://www.gnu.org/licenses/gpl-3.0.txt)
+
 

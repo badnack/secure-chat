@@ -20,6 +20,7 @@ import javax.crypto.SecretKey;
 
 public class ClientThread extends Thread {
     
+    private final String EXITUSER = "EXITUSERNOW";
     private boolean type;
     private User usr;
     static boolean  connect;
@@ -125,11 +126,13 @@ public class ClientThread extends Thread {
         return s;
     }
     
+
     public void run() throws RuntimeException{
         Socket csock;
         ServerSocket ss;
         String FName = null;
         ObjectOutputStream StreamOut=null;
+        final ObjectOutputStream fos;
         byte[] Buff = null;
         ObjectInputStream ois;
         BufferedReader stdIn = new BufferedReader ( new InputStreamReader (System.in));
@@ -196,8 +199,8 @@ public class ClientThread extends Thread {
                 }
                 
             }
+            
             SecretKey key = usr.createDiffieHellman(path.PATHDH,StreamOut,ois);                       
-           
             if(key == null)
                 {
                     System.out.println("[Error] Unable to complete Diffie-Hellman algorhitm");
@@ -213,6 +216,16 @@ public class ClientThread extends Thread {
 
             /*receive messages*/
             new ReceiveMessage(ois,usr).start();
+
+            /*Used to send a quit message to other user*/
+            fos=StreamOut;
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                    public void run() {
+                        try{
+                            fos.writeObject(usr.Encrypt(EXITUSER));            
+                        }catch(Exception x){}
+                    }
+                });
             
             /*send messages*/
             while (true)

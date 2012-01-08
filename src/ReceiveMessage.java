@@ -18,7 +18,10 @@ public class ReceiveMessage extends Thread {
     private  ObjectInputStream input;
     /** User ID*/
     private User usr;
-    
+    private final String EXITUSER = "EXITUSERNOW";
+       
+
+
     /**
        Main constructor
        @param input: input stream
@@ -48,7 +51,7 @@ public class ReceiveMessage extends Thread {
             try{
                 data = (byte[])input.readObject();
                 str = usr.Decrypt(data);
-                if(str==null)break;                
+                if(str==null || (str.compareTo(EXITUSER)==0))break;                
                 System.out.println(usr.getUserName() + "> " + str);
                 System.out.flush();
             }catch(Exception x){}            

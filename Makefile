@@ -1,5 +1,6 @@
 JSRC = src
 JBIN = bin
+JDOC = doc
 JFLAGS = -g
 JCOMP = javac
 JTEST = Client
@@ -8,7 +9,7 @@ PORT2 = 1345
 JTEST2 = TestPriorityServer
 
 cptest:
-	$(JCOMP) $(JFLAGS) -sourcepath $(JSRC) -d $(JBIN) $(JSRC)/Client.java
+	$(JCOMP) $(JFLAGS) -sourcepath $(JSRC) -d $(JBIN) $(JSRC)/Client.java -deprecation
 
 
 all: cptest
@@ -22,7 +23,12 @@ test2:
 cleansource:
 	$(RM) -r $(JBIN)/*
 
-cleanall: cleansource
+cleandoc:
+	$(RM) -r $(JDOC)/html/*
+
+
+cleanall: cleansource cleandoc
+
 
 documentation:
 	javadoc -sourcepath $(JSRC) -d doc/html $(JSRC)/SecureChat/*/*.java
