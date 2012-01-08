@@ -50,7 +50,7 @@ public class Client {
                 /* Registration */
                 if(ch == 0) {
                     cred = menu.NewUserMenu();
-                    if(cred[1].length()<2){
+                    if(cred[1].length()<2 || cred[0].length()<2){
                         System.out.println("Warning: Password is too short.");
                         Thread.sleep(1000);
                         continue;

@@ -12,6 +12,11 @@ package SecureChat.graphics;
 import java.io.*;
 
 public class Menu{
+
+    /** Prints a simple initial menu whereby user can choose what to do 
+        @return int : User choice ( 1 login , 0 registration) 
+        @throws IOException
+     */
     public static int InitialMenu() throws IOException{
         char get;
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -30,6 +35,11 @@ public class Menu{
         }
     }
 
+    /**
+       Prints a Login menu
+       @return String[] : Credentials ( in order user name and password )
+       @throws IOException
+     */
     public String[] RegisteredMenu() throws IOException{
         String [] cred = new String[2];
         BufferedReader stdIn = new BufferedReader ( new InputStreamReader (System.in));
@@ -48,7 +58,11 @@ public class Menu{
         return cred;
     }
 
-    //controllare password vuota
+    /**
+       Prints a simple registration menu
+       @return String[] : Credentials ( in order user name and password )
+       @throws IOException
+     */
     public String[] NewUserMenu()throws IOException{
         String [] cred = new String[2];
 
@@ -66,7 +80,12 @@ public class Menu{
         cred[1] = stdIn.readLine();
         return cred;
     }
-    
+
+
+    /**
+       Pritns the main chat board screen
+       @param toShow : additional informations to show
+     */
     public void ChatBoard(String toShow){
         System.out.print("\033c");
         System.out.println("************************");
