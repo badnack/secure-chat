@@ -43,6 +43,8 @@ import java.util.Arrays;
 public class DiffieHellman{
     /** Length of random exponent */
     static final int LENGTH_RANDOM_EXPONENT = 200;
+    /** Decimal numbers representable by one byte */
+    static final int NUM_BYTE = 64;
     /** Custom separator in a message signed */
     static final String SIGSEPARATOR = "DIGSIG";
     /** Numeber whereby do the module operation */
@@ -166,7 +168,7 @@ public class DiffieHellman{
                                                                                                                                    InvalidKeySpecException,
                                                                                                                                    NoSuchAlgorithmException {
         Random rnd = new Random();
-        int na = rnd.nextInt(1000);
+        int na = rnd.nextInt(NUM_BYTE * 8);
        
        //signs the nonces
         byte [] signed = rsa.SignMessage((Integer.toString(na)).getBytes());
@@ -184,7 +186,6 @@ public class DiffieHellman{
             return null;
            
         int nb = Integer.parseInt(getText(num));
-        // nb-=1;
         
         //signs the new nonces and the the part of secret
         p1 = Integer.toString(na) + SIGSEPARATOR + Integer.toString(nb) + SIGSEPARATOR;
