@@ -170,27 +170,15 @@ public class DiffieHellman{
         Random rnd = new Random();
         int na = rnd.nextInt(NUM_BYTE * 8);
        
-       //signs the nonces
-        byte [] signed = rsa.SignMessage((Integer.toString(na)).getBytes());
+        StreamOut.writeObject((Integer.toString(na)).getBytes());
 
-        String p1 = Integer.toString(na) + SIGSEPARATOR;
-        byte[] toSend = concatBytes(p1.getBytes(),signed);
-        StreamOut.writeObject(toSend);
-
-        byte[] nonce = (byte[]) StreamIn.readObject();
+        byte[] num = (byte[]) StreamIn.readObject();
         
-        int del1 = findDelimiterBytes(nonce,0,SIGSEPARATOR);
-        byte[] num = Arrays.copyOfRange(nonce, 0, del1);
-        byte[] sig = Arrays.copyOfRange(nonce,del1 + SIGSEPARATOR.length(),nonce.length);
-        if(!rsa.CheckSign(num,sig,FName))
-            return null;
-           
         int nb = Integer.parseInt(getText(num));
-        
         //signs the new nonces and the the part of secret
-        p1 = Integer.toString(na) + SIGSEPARATOR + Integer.toString(nb) + SIGSEPARATOR;
+        String p1 = Integer.toString(na) + SIGSEPARATOR + Integer.toString(nb) + SIGSEPARATOR;
         byte[] tosign = concatBytes(p1.getBytes(),publicKey.getEncoded());
-        signed = rsa.SignMessage(tosign);
+        byte[] signed = rsa.SignMessage(tosign);
         
         //Sends number
         byte[] tocn2 = concatBytes(tosign,SIGSEPARATOR.getBytes());
@@ -201,7 +189,7 @@ public class DiffieHellman{
         //message form: Nmine,Nother,Pkey,F(Nmine,Nother,Pkey)
         byte[] nonce2 = (byte[]) StreamIn.readObject();
         
-        del1 = findDelimiterBytes(nonce2,0,SIGSEPARATOR);
+        int del1 = findDelimiterBytes(nonce2,0,SIGSEPARATOR);
         int del2 = findDelimiterBytes(nonce2,del1 + SIGSEPARATOR.length(),SIGSEPARATOR);
         int del3 = findDelimiterBytes(nonce2,del2 + SIGSEPARATOR.length(),SIGSEPARATOR);
 
