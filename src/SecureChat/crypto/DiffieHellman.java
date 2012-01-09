@@ -52,7 +52,9 @@ public class DiffieHellman{
     /** Base number generator */
     private BigInteger g; 
     /** Strings length */
-    private int len;  
+    private int len;
+    /** nonces created during DH alorhithm */
+    private int na,nb;
     /** PublicKey in bytes used to send part of DH shared key */
     byte[] publicKeyBytes ;
     /** Used to check whethet the class istance is valid or not */
@@ -68,6 +70,8 @@ public class DiffieHellman{
         len = LENGTH_RANDOM_EXPONENT;
         publicKeyBytes = null;
         valid = false;
+        na = -1;
+        nb = -1;
         p = null;
         g = null;
         this.rsa = rsa;
@@ -168,13 +172,13 @@ public class DiffieHellman{
                                                                                                                                    InvalidKeySpecException,
                                                                                                                                    NoSuchAlgorithmException {
         Random rnd = new Random();
-        int na = rnd.nextInt(NUM_BYTE * 8);
+        na = rnd.nextInt(NUM_BYTE * 8);
        
         StreamOut.writeObject((Integer.toString(na)).getBytes());
 
         byte[] num = (byte[]) StreamIn.readObject();
         
-        int nb = Integer.parseInt(getText(num));
+        nb = Integer.parseInt(getText(num));
         //signs the new nonces and the the part of secret
         String p1 = Integer.toString(na) + SIGSEPARATOR + Integer.toString(nb) + SIGSEPARATOR;
         byte[] tosign = concatBytes(p1.getBytes(),publicKey.getEncoded());
@@ -271,4 +275,24 @@ public class DiffieHellman{
         return null;
          
     }
+    
+    /** simply return the friend nonce if it has received
+        @return int : nonce
+     */
+    public int getOtherNonce(){
+        if(valid)
+            return nb;
+        else return -1;
+    }
+    
+    /** simply return the nonce if it has created
+        @return int : nonce
+     */
+    public int getMyNonce(){
+        if(valid)
+            return na;
+        else return -1;
+    }
+
+
 }

@@ -62,6 +62,7 @@ public class User{
         this.UserName = log.userBound();
         this.serverPort = port;
         this.serverIp = server;
+        this.des = null;
         if(this.UserName!=null) valid = true;  
     }
    
@@ -212,7 +213,42 @@ public class User{
     public boolean desInstance (SecretKey key){
         des = new Des(key);
         return true;
-    }    
+    }
+
+    /**
+       This function proof the key confirmation property of DH
+       @param key : Key created using Diffie-Hellman
+       @param oos : A socket stream (output)
+       @param ois : A socket stream (input)
+       @return boolean : Result of operation (true if all went well)
+       @throws IOException
+       @throws NoSuchAlgorithmException
+       @throws InvalidKeyException
+       @throws ClassNotFoundException
+       @throws IllegalBlockSizeException
+       @throws BadPaddingException
+       @throws NoSuchPaddingException
+       
+     */
+    public boolean keyConfirmation(SecretKey key,ObjectOutputStream oos,ObjectInputStream ois) throws IOException,
+                                                                                                      NoSuchAlgorithmException,
+                                                                                                      InvalidKeyException,
+                                                                                                      ClassNotFoundException,
+                                                                                                      IllegalBlockSizeException,
+                                                                                                      BadPaddingException,
+                                                                                                      NoSuchPaddingException{
+        int nonce = dh.getOtherNonce();
+        if ( nonce == -1 ) {valid = false; return false;}
+        if(des == null) return false;
+        oos.writeObject(Encrypt(Integer.toString(nonce)));
+        
+        if(Integer.parseInt(Decrypt((byte[])ois.readObject())) == dh.getMyNonce()){
+            valid = true;
+            return true;
+        }
+        return false;
+
+    }
 
     /**
        Allows to decrypt a message according des algorithm

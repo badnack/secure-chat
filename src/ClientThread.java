@@ -199,6 +199,12 @@ public class ClientThread extends Thread {
                 }
                 
             }
+
+            //if the key are not present the user is unable to identify another user
+            if(!usr.isRsaPresent(usr.getFriendName()))
+              PresentKey = false;
+            else PresentKey = true;
+        
             
             SecretKey key = usr.createDiffieHellman(path.PATHDH,StreamOut,ois);                       
             if(key == null)
@@ -208,11 +214,7 @@ public class ClientThread extends Thread {
                 }
   
             usr.desInstance(key);
-
-            //gestire meglio, se un utente esce deve farlo anche l'altro.
-            if(!usr.isRsaPresent(usr.getFriendName()))
-              PresentKey = false;
-            else PresentKey = true;
+            usr.keyConfirmation(key,StreamOut,ois);
 
             /*receive messages*/
             new ReceiveMessage(ois,usr).start();
