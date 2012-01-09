@@ -177,44 +177,41 @@ public class DiffieHellman{
 
         byte[] nonce = (byte[]) StreamIn.readObject();
         
-        int del = findDelimiterBytes(nonce,0,SIGSEPARATOR);
-        byte[] num = Arrays.copyOfRange(nonce, 0, del);
-        byte[] sig = Arrays.copyOfRange(nonce,del+SIGSEPARATOR.length(),nonce.length);
+        int del1 = findDelimiterBytes(nonce,0,SIGSEPARATOR);
+        byte[] num = Arrays.copyOfRange(nonce, 0, del1);
+        byte[] sig = Arrays.copyOfRange(nonce,del1 + SIGSEPARATOR.length(),nonce.length);
         if(!rsa.CheckSign(num,sig,FName))
             return null;
            
         int nb = Integer.parseInt(getText(num));
-        nb-=1;
+        // nb-=1;
         
         //signs the new nonces and the the part of secret
-        p1 = Integer.toString(nb) + SIGSEPARATOR;
+        p1 = Integer.toString(na) + SIGSEPARATOR + Integer.toString(nb) + SIGSEPARATOR;
         byte[] tosign = concatBytes(p1.getBytes(),publicKey.getEncoded());
         signed = rsa.SignMessage(tosign);
         
         //Sends number
-        p1 = Integer.toString(nb) + SIGSEPARATOR;
-        byte[] tocn1 = concatBytes(p1.getBytes(),publicKey.getEncoded());
-        byte[] tocn2 = concatBytes(tocn1,SIGSEPARATOR.getBytes());
+        byte[] tocn2 = concatBytes(tosign,SIGSEPARATOR.getBytes());
         byte[] toSend2 = concatBytes(tocn2,signed);
         StreamOut.writeObject(toSend2);
 
 
-
+        //message form: Nmine,Nother,Pkey,F(Nmine,Nother,Pkey)
         byte[] nonce2 = (byte[]) StreamIn.readObject();
         
-        del = findDelimiterBytes(nonce2,0,SIGSEPARATOR);
-        del = findDelimiterBytes(nonce2,del+SIGSEPARATOR.length(),SIGSEPARATOR);
-      
-        byte[] Part1 = Arrays.copyOfRange(nonce2, 0, del);
-        byte[] sig2 = Arrays.copyOfRange(nonce2,del+SIGSEPARATOR.length(),nonce2.length);
+        del1 = findDelimiterBytes(nonce2,0,SIGSEPARATOR);
+        int del2 = findDelimiterBytes(nonce2,del1 + SIGSEPARATOR.length(),SIGSEPARATOR);
+        int del3 = findDelimiterBytes(nonce2,del2 + SIGSEPARATOR.length(),SIGSEPARATOR);
+
+        byte[] Part1 = Arrays.copyOfRange(nonce2, 0, del3);
+        byte[] sig2 = Arrays.copyOfRange(nonce2,del3 + SIGSEPARATOR.length(),nonce2.length);
         if(!rsa.CheckSign(Part1,sig2,FName))
             return null;
+        byte[] num2 = Arrays.copyOfRange(nonce2, del1 + SIGSEPARATOR.length() , del2);
+        byte[] key = Arrays.copyOfRange(nonce2,del2 + SIGSEPARATOR.length() ,del3); 
       
-        del = findDelimiterBytes(Part1,0,SIGSEPARATOR);
-        byte[] num2 = Arrays.copyOfRange(Part1, 0, del);
-        byte[] key = Arrays.copyOfRange(Part1,del + SIGSEPARATOR.length() ,Part1.length); 
-      
-        if( Integer.parseInt(getText(num2)) != (na-1)){
+        if( Integer.parseInt(getText(num2)) != (na)){
             //trust exception
             return null;
             }
