@@ -210,8 +210,8 @@ public class User{
        @param key : Secret shared key
        @return boolean : True if everything has gone well
      */
-    public boolean desInstance (SecretKey key){
-        des = new Des(key);
+    public boolean desInstance (SecretKey key, String DesPath){
+        des = new Des(key,DesPath);
         return true;
     }
 

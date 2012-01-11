@@ -18,17 +18,23 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import java.io.BufferedReader; 
+import java.io.FileReader;
 
 public class Des {
     
     /** Private session key*/
     private SecretKey SessionKey;
+    private byte[] IV;
     
     /** 
         Main Constructor
         @param key : A secret shared key
     */
-    public Des (SecretKey key) {
+    public Des (SecretKey key, String DesPath) {
+        BufferedReader fis = new BufferedReader(new FileReader(DesPath));
+        this.IV = fis.readLine().getByte();
+        fis.close();
         this.SessionKey = key;
     }
 	
@@ -58,10 +64,10 @@ public class Des {
                                                   IllegalBlockSizeException, 
                                                   BadPaddingException{ 
         //Create the Cipher
-        Cipher DESedeCipher = Cipher.getInstance("DESede/ECB/PKCS5Padding");
-        
+        Cipher DESedeCipher = Cipher.getInstance("DESede/CBC/PKCS5Padding");
+        IvParameterSpec ivSpec = new IvParameterSpec(this.IV);
         // Initialize the cipher for encryption
-        DESedeCipher.init(Cipher.ENCRYPT_MODE, this.SessionKey);
+        DESedeCipher.init(Cipher.ENCRYPT_MODE, this.SessionKey, ivSpec);
         
         // From String to byte[]
         byte[] ClearData = data.getBytes();
@@ -89,10 +95,10 @@ public class Des {
                                                          IllegalBlockSizeException, 
                                                          BadPaddingException {
         //Create the Cipher
-        Cipher DESedeCipher = Cipher.getInstance("DESede/ECB/PKCS5Padding");
-        
+        Cipher DESedeCipher = Cipher.getInstance("DESede/CBC/PKCS5Padding");
+        IvParameterSpec ivSpec = new IvParameterSpec(this.IV);
         // Initialize the cipher for decryption
-        DESedeCipher.init(Cipher.DECRYPT_MODE, this.SessionKey);
+        DESedeCipher.init(Cipher.DECRYPT_MODE, this.SessionKey, ivSpec);
         
         // Decrypt the EncryptData
         byte[] ClearData = DESedeCipher.doFinal(EncryptData);

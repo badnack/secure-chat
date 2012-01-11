@@ -213,7 +213,7 @@ public class ClientThread extends Thread {
                     System.exit(-1);
                 }
   
-            usr.desInstance(key);
+            usr.desInstance(key,path.DESPATH);
             usr.keyConfirmation(key,StreamOut,ois);
 
             /*receive messages*/

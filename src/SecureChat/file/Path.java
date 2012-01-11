@@ -17,11 +17,13 @@ public class Path {
 	public String PATHDH = "";
     /** Users credentials path */
 	public String CREDENTIALSPATH = "";
-	
+    /** CBC IV path*/
+    public String DESPATH="";
     /** Main constructor*/
 	public Path () {
 		KEYDIRECTORY = Path.class.getResource("").getPath().split("bin")[0] + "test/KeyFiles/";
 		PATHDH = Path.class.getResource("").getPath().split("bin")[0] + "test/KeyFiles/PrimeDH/Prime";
 		CREDENTIALSPATH = Path.class.getResource("").getPath().split("bin")[0] + "test/Credentials/";
-	}
+    DESPATH = Path.class.getResource("").getPath().split("bin")[0] + "test/KeyFiles/CBC_IV/CBC_IV";
+  }
 }
