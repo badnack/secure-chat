@@ -21,6 +21,8 @@ import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidKeyException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.BadPaddingException;
+import java.security.InvalidAlgorithmParameterException;
+
 
 public class User{
     /*This class must be called after the login using SecureLogin class.
@@ -209,8 +211,9 @@ public class User{
        Allows to create a des istance
        @param key : Secret shared key
        @return boolean : True if everything has gone well
+       @throws IOException
      */
-    public boolean desInstance (SecretKey key, String DesPath){
+    public boolean desInstance (SecretKey key, String DesPath) throws IOException{
         des = new Des(key,DesPath);
         return true;
     }
@@ -227,6 +230,7 @@ public class User{
        @throws ClassNotFoundException
        @throws IllegalBlockSizeException
        @throws BadPaddingException
+       @throws InvalidAlgorithmParameterException
        @throws NoSuchPaddingException
        
      */
@@ -236,6 +240,7 @@ public class User{
                                                                                                       ClassNotFoundException,
                                                                                                       IllegalBlockSizeException,
                                                                                                       BadPaddingException,
+                                                                                                      InvalidAlgorithmParameterException,
                                                                                                       NoSuchPaddingException{
         int nonce = dh.getOtherNonce();
         if ( nonce == -1 ) {valid = false; return false;}
@@ -258,12 +263,14 @@ public class User{
        @throws NoSuchPaddingException,
        @throws InvalidKeyException,
        @throws IllegalBlockSizeException,
+       @throws InvalidAlgorithmParameterException
        @throws BadPaddingException
      */
     public String Decrypt(byte[] data) throws NoSuchAlgorithmException,
                                               NoSuchPaddingException,
                                               InvalidKeyException,
                                               IllegalBlockSizeException,
+                                              InvalidAlgorithmParameterException,
                                               BadPaddingException{
         return des.DesDecrypt(data);
     }
@@ -276,12 +283,14 @@ public class User{
        @throws NoSuchPaddingException,
        @throws InvalidKeyException,
        @throws IllegalBlockSizeException,
+       @throws InvalidAlgorithmParameterException
        @throws BadPaddingException
      */    
     public byte[] Encrypt(String data) throws NoSuchAlgorithmException,
                                               NoSuchPaddingException,
                                               InvalidKeyException,
                                               IllegalBlockSizeException,
+                                              InvalidAlgorithmParameterException,
                                               BadPaddingException{        
         return des.DesEncrypt(data);
     }

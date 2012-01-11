@@ -18,8 +18,11 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import java.io.BufferedReader; 
-import java.io.FileReader;
+import java.io.FileInputStream; 
+import java.io.File;
+import java.io.IOException;
+import javax.crypto.spec.IvParameterSpec;
+import java.security.InvalidAlgorithmParameterException;
 
 public class Des {
     
@@ -31,9 +34,9 @@ public class Des {
         Main Constructor
         @param key : A secret shared key
     */
-    public Des (SecretKey key, String DesPath) {
-        BufferedReader fis = new BufferedReader(new FileReader(DesPath));
-        this.IV = fis.readLine().getByte();
+    public Des (SecretKey key, String DesPath) throws IOException {
+        FileInputStream fis = new FileInputStream(new File(DesPath));
+        fis.read(this.IV);
         fis.close();
         this.SessionKey = key;
     }
@@ -53,16 +56,18 @@ public class Des {
        @param data : Data to encrypt
        @return byte[] : Data encypted
        @throws NoSuchAlgorithmException
-       @throws NoSuchPaddingException,
-       @throws InvalidKeyException,
-       @throws IllegalBlockSizeException,
+       @throws NoSuchPaddingException
+       @throws InvalidKeyException
+       @throws IllegalBlockSizeException
+       @throws InvalidAlgorithmParameterException
        @throws BadPaddingException
     */   
     public byte[] DesEncrypt (String data) throws NoSuchAlgorithmException,
                                                   NoSuchPaddingException, 
                                                   InvalidKeyException, 
                                                   IllegalBlockSizeException, 
-                                                  BadPaddingException{ 
+                                                  BadPaddingException,
+                                                  InvalidAlgorithmParameterException{ 
         //Create the Cipher
         Cipher DESedeCipher = Cipher.getInstance("DESede/CBC/PKCS5Padding");
         IvParameterSpec ivSpec = new IvParameterSpec(this.IV);
@@ -87,12 +92,15 @@ public class Des {
        @throws NoSuchPaddingException,
        @throws InvalidKeyException,
        @throws IllegalBlockSizeException,
+       @throws InvalidAlgorithmParameterException
        @throws BadPaddingException
+
     */
     public String DesDecrypt (byte[] EncryptData) throws NoSuchAlgorithmException, 
                                                          NoSuchPaddingException, 
                                                          InvalidKeyException, 
                                                          IllegalBlockSizeException, 
+                                                         InvalidAlgorithmParameterException,
                                                          BadPaddingException {
         //Create the Cipher
         Cipher DESedeCipher = Cipher.getInstance("DESede/CBC/PKCS5Padding");
