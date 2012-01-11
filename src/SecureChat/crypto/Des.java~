@@ -36,7 +36,6 @@ public class Des {
         Main Constructor
         @param key : A secret shared key
 	@param DesPath : The path of the IV file
-	@throws IOException
     */
     public Des (SecretKey key, String DesPath) throws IOException {
 	BufferedReader fis = new BufferedReader(new FileReader(DesPath));
