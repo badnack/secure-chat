@@ -13,11 +13,6 @@ import java.io.*;
 
 public class Directory{
     public static final String LOCALHOST = "127.0.0.1";
-    /*public static final String KEYDIRECTORY = "/home/badnack/Projects/SecureChat/SecureChat/secure-chat/test/KeyFiles/";
-    //public static final String KEYDIRECTORY = "/home/davide/SecureChat/KeyFiles";
-    public static final String PATHDH = "/home/badnack/Projects/SecureChat/SecureChat/secure-chat/test/KeyFiles/PrimeDH/Prime";
-    public static final String CREDENTIALSPATH = "/home/badnack/Projects/SecureChat/SecureChat/secure-chat/test/Credentials/";
-    //public static final String CREDENTIALSPATH = "/home/davide/SecureChat/Credentials";*/
 
     /**
        Allows to create a new directory
